@@ -94,15 +94,19 @@
         .error {
             color: red;
         }
+        .description {
+            font-style: italic;
+            color: #555;
+        }
     </style>
 </head>
 <body>
     <h1>Price Lookup</h1>
     <div class="input-container">
-        <input type="text" id="partNumber" placeholder="Enter Part Number (e.g., 66001)">
+        <input type="text" id="partNumber" placeholder="Enter Part Number (e.g., 440-970)">
         <select id="priceType">
+            <option value="retail" selected>Retail Price</option>
             <option value="jobber">Jobber Price</option>
-            <option value="retail">Retail Price</option>
         </select>
         <button onclick="lookupPrice()">Search</button>
     </div>
@@ -110,57 +114,84 @@
 
     <script>
         const priceData = [
-            { partNo: '66001', jobber: 28.34, retail: 24.99 },
-            { partNo: '66002', jobber: 10.23, retail: 8.69 },
-            { partNo: '66003', jobber: 7.75, retail: 8.69 },
-            { partNo: '66004', jobber: 13.92, retail: 11.99 },
-            { partNo: '66007', jobber: 4.31, retail: 4.69 },
-            { partNo: '66008', jobber: 6.58, retail: 5.69 },
-            { partNo: '66013', jobber: 17.66, retail: 14.99 },
-            { partNo: '66018', jobber: 5.92, retail: 6.69 },
-            { partNo: '66035', jobber: 8.23, retail: 7.69 },
-            { partNo: '66036', jobber: 17.28, retail: 18.99 },
-            { partNo: '66038', jobber: 10.71, retail: 10.99 },
-            { partNo: '66106', jobber: 7.97, retail: 7.69 },
-            { partNo: '66107', jobber: 4.68, retail: 4.69 },
-            { partNo: '66108', jobber: 3.74, retail: 4.69 },
-            { partNo: '66109', jobber: 4.85, retail: 5.69 },
-            { partNo: '66116', jobber: 11.54, retail: 10.99 },
-            { partNo: '66117', jobber: 10.00, retail: 11.99 },
-            { partNo: '66120', jobber: 9.97, retail: 10.99 }
-        ];
-
-        function lookupPrice() {
-            const partNumber = document.getElementById('partNumber').value.trim();
-            const priceType = document.getElementById('priceType').value;
-            const resultDiv = document.getElementById('result');
-
-            if (!partNumber) {
-                resultDiv.innerHTML = '<span class="error">Please enter a part number.</span>';
-                return;
-            }
-
-            const item = priceData.find(item => item.partNo === partNumber);
-            if (item) {
-                const price = priceType === 'jobber' ? item.jobber : item.retail;
-                resultDiv.innerHTML = `The ${priceType} price for part ${partNumber} is $${price.toFixed(2)}.`;
-            } else {
-                resultDiv.innerHTML = `<span class="error">Part number ${partNumber} not found.</span>`;
-            }
-        }
-
-        // Register service worker for offline support
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(registration => {
-                        console.log('Service Worker registered with scope:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.error('Service Worker registration failed:', error);
-                    });
-            });
-        }
-    </script>
-</body>
-</html>
+            { partNo: '440-970', jobber: 5.95, retail: 5.215384615, description: 'MOPAR EMBLEM COLLECTIBLE PISTON ROD KEYCHAIN, 1 PC*' },
+            { partNo: '141-615', jobber: 7.95, retail: 8.061538462, description: 'GROMMET SET. ONE PUSH-IN FOR AIR BREATHER & ONE FOR PCV VALVE.*' },
+            { partNo: '141-200', jobber: 8.95, retail: 9.215384615, description: 'CHEVY S/B TIMING TAB WITH 6-3/4 OR 7 BALANCER. CHEVY 1969-90.*' },
+            { partNo: '141-201', jobber: 8.95, retail: 9.215384615, description: 'CHEVY B/B TIMING TAB WITH 8 BALANCER. CHEVY 1965-91.*' },
+            { partNo: '141-202', jobber: 8.95, retail: 9.215384615, description: 'CHEVY S/B TIMING TAB WITH 8 BALANCER. CHEVY 1969-91.*' },
+            { partNo: '141-211', jobber: 12.95, retail: 13.86153846, description: 'CHEVY BOWTIE EMBLEM FUEL PUMP BLOCK-OFF PLATE. CHEVY B/B V8.*' },
+            { partNo: '141-213', jobber: 12.95, retail: 13.86153846, description: 'CHEVY BOWTIE EMBLEM FUEL PUMP BLOCK-OFF PLATE. CHEVY B/B V8. BLACK CRINKLE.*' },
+            { partNo: '141-210', jobber: 12.95, retail: 13.86153846, description: 'CHEVY BOWTIE EMBLEM FUEL PUMP BLOCK-OFF PLATE. CHEVY S/B V8.*' },
+            { partNo: '141-212', jobber: 12.95, retail: 13.86153846, description: 'CHEVY BOWTIE EMBLEM FUEL PUMP BLOCK-OFF PLATE. CHEVY S/B V8. BLACK CRINKLE.*' },
+            { partNo: '141-322', jobber: 13.95, retail: 15.01538462, description: 'SMALL CHEVY BOWTIE AIR CLEANER CENTER NUT.*' },
+            { partNo: '141-328', jobber: 13.95, retail: 15.01538462, description: 'SMALL HI-TECH CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT.*' },
+            { partNo: '141-332', jobber: 13.95, retail: 15.01538462, description: 'SMALL HI-TECH GM LOGO AIR CLEANER CENTER NUT.*' },
+            { partNo: '141-333', jobber: 14.95, retail: 16.18461538, description: 'LARGE CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT.*' },
+            { partNo: '141-629', jobber: 14.95, retail: 16.18461538, description: 'CHEVY BOWTIE EMBLEM PUSH-IN OIL FILLER CAP, BLACK CRINKLE*' },
+            { partNo: '141-630', jobber: 14.95, retail: 16.18461538, description: 'CHEVY BOWTIE EMBLEM PUSH-IN OIL FILLER CAP.*' },
+            { partNo: '141-227', jobber: 14.95, retail: 16.18461538, description: 'GM MASTER CYLINDER COVER. SINGLE CLIP. 5-5/8 x 3, FOR POWER DISK BRAKES OR MANUAL.*' },
+            { partNo: '141-323', jobber: 14.95, retail: 16.18461538, description: 'LARGE HI-TECH CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT.*' },
+            { partNo: '141-327', jobber: 14.95, retail: 16.18461538, description: 'LARGE HI-TECH GM LOGO AIR CLEANER CENTER NUT.*' },
+            { partNo: '141-616', jobber: 15.95, retail: 17.33846154, description: 'CHEVY BOWTIE EMBLEM PUSH-IN AIR BREATHER CAP, 3 DIAMETER.*' },
+            { partNo: '141-617', jobber: 15.95, retail: 17.33846154, description: 'CHEVY BOWTIE EMBLEM PUSH-ON AIR BREATHER CAP, 3 DIAMETER. USE W/ OIL FILLER TUBE.*' },
+            { partNo: '141-618', jobber: 15.95, retail: 17.33846154, description: 'CHEVY BOWTIE EMBLEM TWIST-ON AIR BREATHER CAP, 3 DIAMETER. USE W/ CHEVY STYLE HOLES.*' },
+            { partNo: '141-619', jobber: 15.95, retail: 17.33846154, description: 'CHEVY BOWTIE EMBLEM PUSH-IN AIR BREATHER CAP, RECTANGULAR. USE W/ CHEVY STYLE HOLES.*' },
+            { partNo: '141-338', jobber: 16.95, retail: 18.49230769, description: 'EXTRA-LARGE CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT, CHROME WITH BLACK*' },
+            { partNo: '141-339', jobber: 16.95, retail: 18.49230769, description: 'EXTRA-LARGE CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT, BLACK CRINKLE WITH BLACK.*' },
+            { partNo: '141-369', jobber: 16.95, retail: 18.49230769, description: 'LARGE CHEVY BOWTIE EMBLEM, BLACK CRINKLE, AIR CLEANER CENTER NUT.*' },
+            { partNo: '141-335', jobber: 16.95, retail: 18.49230769, description: 'EXTRA-LARGE CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT, BLACK CRINKLE WITH RED.*' },
+            { partNo: '141-336', jobber: 16.95, retail: 18.49230769, description: 'EXTRA-LARGE CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT, CHROME WITH GOLD.*' },
+            { partNo: '141-636', jobber: 16.95, retail: 18.49230769, description: 'CHEVROLET & BOWTIE EMBLEM WIRE LOOMS. CHEVY S/B V8, 1959-86; CHEVY B/B V8 1965-91.*' },
+            { partNo: '141-550', jobber: 19.95, retail: 20.81538462, description: 'CHEVY OIL DIP STICK KIT. SMALL BLOCK V8 THRU 1977.*' },
+            { partNo: '141-551', jobber: 19.95, retail: 20.81538462, description: 'CHEVY OIL DIP STICK KIT. SMALL BLOCK V8 1978-81.*' },
+            { partNo: '141-133', jobber: 20.95, retail: 21.96923077, description: 'CHEVY V/C HOLD-DOWN BOLTS / 8 PCS*' },
+            { partNo: '141-367', jobber: 21.95, retail: 23.12307692, description: 'MINI NUTS, VALVE COVER, STEEL, GRAY, BLUE BOWTIE EMBLEM*' },
+            { partNo: '141-601', jobber: 21.95, retail: 23.12307692, description: 'MINI NUTS, VALVE COVER, STEEL, ORANGE, BLACK BOWTIE EMBLEM*' },
+            { partNo: '141-759', jobber: 21.95, retail: 23.12307692, description: 'MINI NUTS, VALVE COVER, STEEL, BLACK, RED BOWTIE EMBLEM*' },
+            { partNo: '141-909', jobber: 21.95, retail: 23.12307692, description: 'MINI NUTS, VALVE COVER, STEEL, CHROME, RED BOWTIE EMBLEM*' },
+            { partNo: '440-884', jobber: 21.95, retail: 22.29230769, description: 'MOPAR STAMPED STEEL AIR BREATHER CAP; SHARK GRAY W/ BLACK MOPAR EMBLEM*' },
+            { partNo: '141-786', jobber: 21.95, retail: 23.12307692, description: 'CHEVY BOWTIE EMBLEM PUSH-IN AIR BREATHER CAP, 3 DIAMETER, ORANGE*' },
+            { partNo: '440-616', jobber: 21.95, retail: 22.29230769, description: 'MOPAR STAMPED STEEL, PUSH-IN BREATHER CAP, 3 DIAMETER,CHROME WITH RECESSED BLUE OMEGA M*' },
+            { partNo: '141-553', jobber: 21.95, retail: 23.12307692, description: 'CHEVY OIL DIP STICK KIT. BIG BLOCK V8 1965-91.*' },
+            { partNo: '141-602', jobber: 21.95, retail: 23.12307692, description: 'MINI NUTS, VALVE COVER, STEEL, RED, BOWTIE EMBLEM*' },
+            { partNo: '141-754', jobber: 21.95, retail: 23.12307692, description: 'CHEVY BOWTIE EMBLEM PUSH-IN AIR BREATHER CAP, 3 DIAMETER. BLACK CRINKLE.*' },
+            { partNo: '141-884', jobber: 21.95, retail: 23.12307692, description: 'CHEVY & BOWTIE EMBLEM; PUSH-IN BREATHER CAP; 3 DIAMETER; SHARK GRAY*' },
+            { partNo: '440-754', jobber: 21.95, retail: 22.29230769, description: 'MOPAR PUSH-IN AIR BREATHER CAP; BLACK CRINKLE*' },
+            { partNo: '141-610', jobber: 22.95, retail: 24.27692308, description: 'CHEVY VALVE COVER HOLD-DOWN CLAMPS. CHEVY S/B V8 & V6/90DEG. THRU 1986.*' },
+            { partNo: '440-337', jobber: 23.95, retail: 24.52307692, description: 'MOPAR DELUXE AIR CLEANER CENTER NUT; CHROME W/ BLUE EMBLEM*' },
+            { partNo: '440-338', jobber: 23.95, retail: 24.52307692, description: 'MOPAR DELUXE AIR CLEANER CENTER NUT; CHROME W/ BLACK EMBLEM*' },
+            { partNo: '440-339', jobber: 23.95, retail: 24.52307692, description: 'MOPAR DELUXE AIR CLEANER CENTER NUT; BLACK CRINKLE*' },
+            { partNo: '66757', jobber: 26.95, retail: 27.23076923, description: 'WEDGE-LOCKING EXHAUST COLLECTOR BOLTS, 6 PIECES*' },
+            { partNo: '141-500', jobber: 26.95, retail: 28.92307692, description: 'CHEVY WATER NECK W/ O-RING. V8 1955-65; CHEVY II V8 1964; CORVETTE 1956-63.*' },
+            { partNo: '141-501', jobber: 26.95, retail: 28.92307692, description: 'CHEVY WATER NECK V8 W/ O-RING. CHEVY, CAMARO, & CHEVELLE V8 1966-1975.*' },
+            { partNo: '141-757', jobber: 26.95, retail: 27.76923077, description: 'CHEVY BOWTIE EMBLEM V/C HOLD-DOWN CLAMPS. BLACK CRINKLE. CHEVY S/B V8, & V6/90DEG. THRU 1986.*' },
+            { partNo: '141-782', jobber: 26.95, retail: 27.76923077, description: 'CHEVY BOWTIE EMBLEM V/C HOLD-DOWN CLAMPS, ORANGE, CHEVY S/B V8 & V6/90 THRU 1986*' },
+            { partNo: '141-885', jobber: 26.95, retail: 27.76923077, description: 'CHEVY & BOWTIE EMBLEM; VALVE COVER HOLD DOWN CLAMPS; SHARK GRAY; 4-PER PACKAGE*' },
+            { partNo: '141-903', jobber: 26.95, retail: 28.92307692, description: 'CHEVROLET & BOWTIE EMBLEM CHROME HOLD DOWN CLAMPS.*' },
+            { partNo: '141-614', jobber: 29.95, retail: 32.4, description: 'CHEVY BOWTIE EMBLEM PUSH-IN FILTER AIR BREATHER WITHOUT HOOD, 3 DIAMETER, BLACK CRINKLE*' },
+            { partNo: '141-622', jobber: 29.95, retail: 32.4, description: 'CHEVY BOWTIE EMBLEM PUSH-IN FILTER AIR BREATHER WITHOUT HOOD, 3 DIAMETER.*' },
+            { partNo: '141-756', jobber: 30.95, retail: 33.55384615, description: 'CHEVY BOWTIE EMBLEM VALVE COVER WING NUTS. BLACK CRINKLE.S/B, B/B & V6*' },
+            { partNo: '141-886', jobber: 30.95, retail: 33.55384615, description: 'CHEVY & BOWTIE EMBLEM; WING NUTS; SHARK GRAY; 4-PER PACKAGE*' },
+            { partNo: '141-600', jobber: 31.95, retail: 34.72307692, description: 'CHEVY BOWTIE EMBLEM CHROME VALVE COVER WING NUTS. CHEVY S/B, B/B & V6. 4 PER PACKAGE*' },
+            { partNo: '141-613', jobber: 31.95, retail: 34.72307692, description: 'CHEVY BOWTIE EMBLEM PUSH-IN FILTER AIR BREATHER WITH HOOD, 3 DIAMETER, BLACK CRINKLE*' },
+            { partNo: '141-621', jobber: 31.95, retail: 34.72307692, description: 'CHEVY BOWTIE EMBLEM PUSH-IN FILTER AIR BREATHER WITH HOOD, 3 DIAMETER.*' },
+            { partNo: '141-215', jobber: 31.95, retail: 34.72307692, description: 'CHEVROLET & BOWTIE EMBLEM CHROME TIMING CHAIN COVER. CHEVY S/B V8, 1969-91 AND V6/90DEG.*' },
+            { partNo: '141-625', jobber: 31.95, retail: 34.72307692, description: 'CHEVY BOWTIE EMBLEM AIR BREATHER CAP, FILTER TYPE WITH HOOD, CLAMP ON STYLE 1 3/8*' },
+            { partNo: '141-902', jobber: 31.95, retail: 34.72307692, description: 'CHEVROLET & BOWTIE EMBLEM CHROME W/ RED EMBLEM VALVE COVER WING NUTS.*' },
+            { partNo: '440-756', jobber: 33.95, retail: 35.69230769, description: 'MOPAR - V/C WING NUTS; BLACK CRINKLE, BLUE EMBLEM*' },
+            { partNo: '440-886', jobber: 33.95, retail: 35.69230769, description: 'MOPAR VALVE COVER WING NUTS; SHARK GRAY W/ BLACK MOPAR EMBLEM*' },
+            { partNo: '440-902', jobber: 33.95, retail: 35.69230769, description: 'MOPAR - V/C WING NUTS; CHROME, BLUE EMBLEM*' },
+            { partNo: '66751', jobber: 34.95, retail: 34.18461538, description: 'WEDGE-LOCKING HEADER BOLTS 3/4L X 3/8, 12 PIECES*' },
+            { partNo: '66754', jobber: 34.95, retail: 34.18461538, description: 'WEDGE-LOCKING HEADER BOLTS LS, .984L x 8mm, 12 PIECES*' },
+            { partNo: '66824', jobber: 34.95, retail: 34.93846154, description: 'WEDGE-LOCKING HEADER BOLTS 1L x 3/8; 12 PCS; NICKEL PLATED*' },
+            { partNo: '66827', jobber: 34.95, retail: 34.93846154, description: 'WEDGE-LOCKING HEADER BOLTS 3/4L x 3/8; 12 PCS; NICKEL PLATED*' },
+            { partNo: '66753', jobber: 34.95, retail: 34.18461538, description: 'WEDGE-LOCKING HEADER BOLTS 1L X 3/8, 12 PIECES*' },
+            { partNo: '66755', jobber: 34.95, retail: 34.18461538, description: 'WEDGE-LOCKING HEADER BOLTS LS, 1.181L x 8mm, 12 PIECES*' },
+            { partNo: 'BB1903', jobber: 34.95, retail: 40.29230769, description: 'LIGHTWEIGHT PRECISION CALIBRATED TEST SPRING*' },
+            { partNo: '66752', jobber: 37.95, retail: 37.78461538, description: 'WEDGE-LOCKING HEADER BOLTS 3/4L X 3/8, 16 PIECES*' },
+            { partNo: '66756', jobber: 37.95, retail: 37.78461538, description: 'WEDGE-LOCKING HEADER BOLTS 1L x 3/8, 16 PIECES*' },
+            { partNo: '141-753', jobber: 37.95, retail: 40.52307692, description: 'CHEVROLET & BOWTIE EMBLEM TIMING CHAIN COVER. BLACK CRINKLE. CHEVY S/B V8, 1969-91 AND V6/90DEG.*' },
+            { partNo: '141-783', jobber: 37.95, retail: 40.52307692, description: 'CHEVROLET AND BOWTIE EMBLEM TIMING CHAIN COVER, ORANGE, CHEVY S/B V8, 1969-91 AND V6/90*' },
+            { partNo: '141-850', jobber: 37.95, retail: 40.52307692, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BREATHER CAP; NO EMBLEM; POLISHED*' },
+            { partNo: '141-851', jobber: 37.95, retail: 40.52307692, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BREATHER CAP; NO EMBLEM; CHROME*' },
+            { partNo: '141-862', jobber: 37.95, retail: 40.52307692, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BRE
