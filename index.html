@@ -1,0 +1,166 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <title>Price Lookup PWA</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .input-container {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 70%;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        select {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Price Lookup</h1>
+    <div class="input-container">
+        <input type="text" id="partNumber" placeholder="Enter Part Number (e.g., 66001)">
+        <select id="priceType">
+            <option value="jobber">Jobber Price</option>
+            <option value="retail">Retail Price</option>
+        </select>
+        <button onclick="lookupPrice()">Search</button>
+    </div>
+    <div id="result"></div>
+
+    <script>
+        const priceData = [
+            { partNo: '66001', jobber: 28.34, retail: 24.99 },
+            { partNo: '66002', jobber: 10.23, retail: 8.69 },
+            { partNo: '66003', jobber: 7.75, retail: 8.69 },
+            { partNo: '66004', jobber: 13.92, retail: 11.99 },
+            { partNo: '66007', jobber: 4.31, retail: 4.69 },
+            { partNo: '66008', jobber: 6.58, retail: 5.69 },
+            { partNo: '66013', jobber: 17.66, retail: 14.99 },
+            { partNo: '66018', jobber: 5.92, retail: 6.69 },
+            { partNo: '66035', jobber: 8.23, retail: 7.69 },
+            { partNo: '66036', jobber: 17.28, retail: 18.99 },
+            { partNo: '66038', jobber: 10.71, retail: 10.99 },
+            { partNo: '66106', jobber: 7.97, retail: 7.69 },
+            { partNo: '66107', jobber: 4.68, retail: 4.69 },
+            { partNo: '66108', jobber: 3.74, retail: 4.69 },
+            { partNo: '66109', jobber: 4.85, retail: 5.69 },
+            { partNo: '66116', jobber: 11.54, retail: 10.99 },
+            { partNo: '66117', jobber: 10.00, retail: 11.99 },
+            { partNo: '66120', jobber: 9.97, retail: 10.99 }
+        ];
+
+        function lookupPrice() {
+            const partNumber = document.getElementById('partNumber').value.trim();
+            const priceType = document.getElementById('priceType').value;
+            const resultDiv = document.getElementById('result');
+
+            if (!partNumber) {
+                resultDiv.innerHTML = '<span class="error">Please enter a part number.</span>';
+                return;
+            }
+
+            const item = priceData.find(item => item.partNo === partNumber);
+            if (item) {
+                const price = priceType === 'jobber' ? item.jobber : item.retail;
+                resultDiv.innerHTML = `The ${priceType} price for part ${partNumber} is $${price.toFixed(2)}.`;
+            } else {
+                resultDiv.innerHTML = `<span class="error">Part number ${partNumber} not found.</span>`;
+            }
+        }
+
+        // Register service worker for offline support
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
