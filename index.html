@@ -117,9 +117,11 @@
         </div>
     </div>
 
-    <script>
-        const partsData = [            
-            { partNo:'66002', retail: '$8.69', jobber: '$10.23', description: 'Chrome Flange Hold Downs. Chevy S/B & B/B; Ford S/B. 3 in. Long..' },
+	<script>
+        const partsData = [
+            { partNo: '440-970', retail: '$5.95', jobber: '$5.22', description: 'MOPAR EMBLEM COLLECTIBLE PISTON ROD KEYCHAIN, 1 PC*' },
+            { partNo: '141-615', retail: '$7.95', jobber: '$8.06', description: 'GROMMET SET. ONE PUSH-IN FOR AIR BREATHER & ONE FOR PCV VALVE.*' },
+			{ partNo:'66002', retail: '$8.69', jobber: '$10.23', description: 'Chrome Flange Hold Downs. Chevy S/B & B/B; Ford S/B. 3 in. Long..' },
             { partNo:'66003', retail: '$8.69', jobber: '$7.75', description: 'Chrome Hold Down Washers. For All Stamped Valve Covers..' },
             { partNo:'66004', retail: '$11.99', jobber: '$13.92', description: 'T-Bar Valve Cover Wing Nuts. 5 in. High..' },
             { partNo:'66007', retail: '$4.69', jobber: '$4.31', description: 'Valve Cover Grommets. 1 Air Breather & 1 Pcv..' },
@@ -1081,8 +1083,9 @@
             { partNo:'BB1901', retail: '$84.95', jobber: '$91.28', description: '3-In-1 Precision Calibrated Test Spring; For Light/Mid/Heavy Spring Testers‡.' },
             { partNo:'BB1902', retail: '$45.95', jobber: '$49.03', description: 'Midweight Precision Calibrated Test Spring‡.' },
             { partNo:'BB1903', retail: '$34.95', jobber: '$40.29', description: 'Lightweight Precision Calibrated Test Spring‡.' },
-            { partNo:'BB1920'', retail: '$58.95', jobber: '$62.74', description: 'Bracket Kit, Rimac Spring Tester‡.' },
-            { partNo:'440-970'', retail: '$5.95', jobber: '$5.22', description: 'MOPAR EMBLEM COLLECTIBLE PISTON ROD KEYCHAIN, 1 PC*' }
+			{ partNo:'BB1920', retail: '$58.95', jobber: '$62.74', description: 'Bracket Kit, Rimac Spring Tester‡.' },
+            { partNo:'440-970', retail: '$5.95', jobber: '$5.22', description: 'MOPAR EMBLEM COLLECTIBLE PISTON ROD KEYCHAIN, 1 PC*' },			
+            { partNo: '141-759', retail: '$21.95', jobber: '$23.12', description: 'MINI NUTS, VALVE COVER, STEEL, BLACK, RED BOWTIE EMBLEM*' }
         ];
 
         const priceTypeSelect = document.getElementById('priceType');
@@ -1102,7 +1105,7 @@
 
             if (part) {
                 const price = priceType === 'retail' ? part.retail : part.jobber;
-                resultSpan.innerHTML = `<b>${priceType.charAt(0).toUpperCase() + priceType.slice(1)} price for Part No ${part.partNo} is <span class= in.price in.>${price}</span></b><span class= in.description in.>${part.description}</span>`;
+                resultSpan.innerHTML = `<b>${priceType.charAt(0).toUpperCase() + priceType.slice(1)} price for Part No ${part.partNo} is <span class="price">${price}</span></b><span class="description">${part.description}</span>`;
             } else {
                 resultSpan.innerHTML = 'Part not found.';
             }
