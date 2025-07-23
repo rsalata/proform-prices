@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang= in.en in.>
+<html lang="en">
 <head>
-    <meta charset= in.UTF-8 in.>
-    <meta name= in.viewport in. content= in.width=device-width, initial-scale=1.0 in.>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Part Price Lookup PWA</title>
-    <link rel= in.manifest in. href= in.manifest.json in.>
-    <link rel= in.icon in. href= in.icon.png in.>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.png">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -82,42 +82,42 @@
     </style>
 </head>
 <body>
-    <img src= in.logo.png in. alt= in.Company Logo in. class= in.logo in.>
+    <img src="logo.png" alt="Company Logo" class="logo">
     <h1>Part Price Lookup</h1>
-    <select id= in.priceType in.>
-        <option value= in.retail in.>Retail Price</option>
-        <option value= in.jobber in.>Jobber Price</option>
+    <select id="priceType">
+        <option value="retail">Retail Price</option>
+        <option value="jobber">Jobber Price</option>
     </select>
 
-    <div id= in.partInputs in.>
-        <div class= in.part-row in.>
-            <input type= in.text in. class= in.part-input in. id= in.partNo1 in. placeholder= in.Part No 1 (e.g., 440-970) in.>
-            <button onclick= in.lookupPart(1) in.>Search</button>
-            <span class= in.result in. id= in.result1 in.></span>
+    <div id="partInputs">
+        <div class="part-row">
+            <input type="text" class="part-input" id="partNo1" placeholder="Part No 1 (e.g., 440-970)">
+            <button onclick="lookupPart(1)">Search</button>
+            <span class="result" id="result1"></span>
         </div>
-        <div class= in.part-row in.>
-            <input type= in.text in. class= in.part-input in. id= in.partNo2 in. placeholder= in.Part No 2 in.>
-            <button onclick= in.lookupPart(2) in.>Search</button>
-            <span class= in.result in. id= in.result2 in.></span>
+        <div class="part-row">
+            <input type="text" class="part-input" id="partNo2" placeholder="Part No 2">
+            <button onclick="lookupPart(2)">Search</button>
+            <span class="result" id="result2"></span>
         </div>
-        <div class= in.part-row in.>
-            <input type= in.text in. class= in.part-input in. id= in.partNo3 in. placeholder= in.Part No 3 in.>
-            <button onclick= in.lookupPart(3) in.>Search</button>
-            <span class= in.result in. id= in.result3 in.></span>
+        <div class="part-row">
+            <input type="text" class="part-input" id="partNo3" placeholder="Part No 3">
+            <button onclick="lookupPart(3)">Search</button>
+            <span class="result" id="result3"></span>
         </div>
-        <div class= in.part-row in.>
-            <input type= in.text in. class= in.part-input in. id= in.partNo4 in. placeholder= in.Part No 4 in.>
-            <button onclick= in.lookupPart(4) in.>Search</button>
-            <span class= in.result in. id= in.result4 in.></span>
+        <div class="part-row">
+            <input type="text" class="part-input" id="partNo4" placeholder="Part No 4">
+            <button onclick="lookupPart(4)">Search</button>
+            <span class="result" id="result4"></span>
         </div>
-        <div class= in.part-row in.>
-            <input type= in.text in. class= in.part-input in. id= in.partNo5 in. placeholder= in.Part No 5 in.>
-            <button onclick= in.lookupPart(5) in.>Search</button>
-            <span class= in.result in. id= in.result5 in.></span>
+        <div class="part-row">
+            <input type="text" class="part-input" id="partNo5" placeholder="Part No 5">
+            <button onclick="lookupPart(5)">Search</button>
+            <span class="result" id="result5"></span>
         </div>
     </div>
 
-	<script>
+    <script>
         const partsData = [
             { partNo: '440-970', retail: '$5.95', jobber: '$5.22', description: 'MOPAR EMBLEM COLLECTIBLE PISTON ROD KEYCHAIN, 1 PC*' },
             { partNo: '141-615', retail: '$7.95', jobber: '$8.06', description: 'GROMMET SET. ONE PUSH-IN FOR AIR BREATHER & ONE FOR PCV VALVE.*' },
@@ -1086,7 +1086,7 @@
 			{ partNo:'BB1920', retail: '$58.95', jobber: '$62.74', description: 'Bracket Kit, Rimac Spring Tester‡.' },
             { partNo:'440-970', retail: '$5.95', jobber: '$5.22', description: 'MOPAR EMBLEM COLLECTIBLE PISTON ROD KEYCHAIN, 1 PC*' },			
             { partNo: '141-759', retail: '$21.95', jobber: '$23.12', description: 'MINI NUTS, VALVE COVER, STEEL, BLACK, RED BOWTIE EMBLEM*' }
-        ];
+    ];
 
         const priceTypeSelect = document.getElementById('priceType');
 
