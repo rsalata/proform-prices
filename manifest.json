@@ -1,11 +1,10 @@
 {
-    "name": "Price Lookup PWA",
-    "short_name": "Price Lookup",
-    "description": "A PWA to look up jobber or retail prices by part number",
-    "start_url": "/index.html",
+    "name": "Part Price Lookup",
+    "short_name": "PartLookup",
+    "start_url": ".",
     "display": "standalone",
     "background_color": "#ffffff",
-    "theme_color": "#007bff",
+    "theme_color": "#000000",
     "icons": [
         {
             "src": "icon.png",
