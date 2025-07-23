@@ -9,31 +9,66 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
         }
-        input, select {
-            width: 100%;
+        select, input {
             padding: 10px;
-            margin: 10px 0;
+            margin: 10px 5px;
         }
-        #result {
-            margin-top: 20px;
+        .part-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .part-input {
+            flex: 1;
+            margin-right: 10px;
+        }
+        .result {
+            margin-left: 20px;
+        }
+        button {
             padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <h1>Part Price Lookup</h1>
-    <input type="text" id="partNo" placeholder="Enter Part No. (e.g., 440-970)">
     <select id="priceType">
         <option value="retail">Retail Price</option>
         <option value="jobber">Jobber Price</option>
     </select>
-    <div id="result"></div>
+
+    <div id="partInputs">
+        <div class="part-row">
+            <input type="text" class="part-input" id="partNo1" placeholder="Part No 1 (e.g., 440-970)">
+            <button onclick="lookupPart(1)">Search</button>
+            <span class="result" id="result1"></span>
+        </div>
+        <div class="part-row">
+            <input type="text" class="part-input" id="partNo2" placeholder="Part No 2">
+            <button onclick="lookupPart(2)">Search</button>
+            <span class="result" id="result2"></span>
+        </div>
+        <div class="part-row">
+            <input type="text" class="part-input" id="partNo3" placeholder="Part No 3">
+            <button onclick="lookupPart(3)">Search</button>
+            <span class="result" id="result3"></span>
+        </div>
+        <div class="part-row">
+            <input type="text" class="part-input" id="partNo4" placeholder="Part No 4">
+            <button onclick="lookupPart(4)">Search</button>
+            <span class="result" id="result4"></span>
+        </div>
+        <div class="part-row">
+            <input type="text" class="part-input" id="partNo5" placeholder="Part No 5">
+            <button onclick="lookupPart(5)">Search</button>
+            <span class="result" id="result5"></span>
+        </div>
+    </div>
 
     <script>
         const partsData = [
@@ -1003,27 +1038,35 @@
 { partNo: '66915C, retail: '188.14, jobber: '289.45, description: 'EXTRUDED ALUMINUM ROLLER-ROCKERS. CHEVY S/B, 1.6 RATIO, 3/8" STUD. SELF ALIGNING.*'}
         ];
 
-        const partNoInput = document.getElementById('partNo');
         const priceTypeSelect = document.getElementById('priceType');
-        const resultDiv = document.getElementById('result');
 
-        function lookupPart() {
+        function lookupPart(index) {
+            const partNoInput = document.getElementById(`partNo${index}`);
+            const resultSpan = document.getElementById(`result${index}`);
             const partNo = partNoInput.value.trim().toUpperCase();
             const priceType = priceTypeSelect.value;
             const part = partsData.find(p => p.partNo.toUpperCase() === partNo);
+
             if (part) {
                 const price = priceType === 'retail' ? part.retail : part.jobber;
-                resultDiv.innerHTML = `<strong>Price:</strong> ${price}<br><strong>Description:</strong> ${part.description}`;
+                resultSpan.innerHTML = `${priceType.charAt(0).toUpperCase() + priceType.slice(1)} price for Part No ${part.partNo} is ${price} ${part.description}`;
             } else {
-                resultDiv.innerHTML = 'Part not found.';
+                resultSpan.innerHTML = partNo ? 'Part not found.' : '';
             }
         }
 
-        partNoInput.addEventListener('input', lookupPart);
-        priceTypeSelect.addEventListener('change', lookupPart);
-    </script>
+        function updateAllResults() {
+            for (let i = 1; i <= 5; i++) {
+                lookupPart(i);
+            }
+        }
 
-    <script>
+        priceTypeSelect.addEventListener('change', updateAllResults);
+
+        for (let i = 1; i <= 5; i++) {
+            document.getElementById(`partNo${i}`).addEventListener('input', () => lookupPart(i));
+        }
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')
