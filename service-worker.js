@@ -1,9 +1,9 @@
-const CACHE_NAME = 'price-lookup-cache-v1';
+const CACHE_NAME = 'part-price-cache-v1';
 const urlsToCache = [
-    '/',
-    '/index.html',
-    '/manifest.json',
-    '/icon.png'
+    '.',
+    'index.html',
+    'manifest.json',
+    'icon.png'
 ];
 
 self.addEventListener('install', event => {
