@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#ffffff">
-    <title>Price Lookup PWA</title>
+    <title>Part Price Lookup PWA</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icon.png">
     <style>
@@ -13,463 +12,93 @@
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f4f4f4;
         }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .input-container {
-            margin-bottom: 20px;
-        }
-        input[type="text"] {
+        input, select {
+            width: 100%;
             padding: 10px;
-            width: 70%;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        select {
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
+            margin: 10px 0;
         }
         #result {
             margin-top: 20px;
-            font-size: 18px;
-            color: #333;
-        }
-        .error {
-            color: red;
-        }
-        .description {
-            font-style: italic;
-            color: #555;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <h1>Price Lookup</h1>
-    <div class="input-container">
-        <input type="text" id="partNumber" placeholder="Enter Part Number (e.g., 440-970)">
-        <select id="priceType">
-            <option value="retail" selected>Retail Price</option>
-            <option value="jobber">Jobber Price</option>
-        </select>
-        <button onclick="lookupPrice()">Search</button>
-    </div>
+    <h1>Part Price Lookup</h1>
+    <input type="text" id="partNo" placeholder="Enter Part No. (e.g., 440-970)">
+    <select id="priceType">
+        <option value="retail">Retail Price</option>
+        <option value="jobber">Jobber Price</option>
+    </select>
     <div id="result"></div>
 
     <script>
-        const priceData = [
-            { partNo: '440-970', jobber: 5.95, retail: 5.215384615, description: 'MOPAR EMBLEM COLLECTIBLE PISTON ROD KEYCHAIN, 1 PC*' },
-            { partNo: '141-615', jobber: 7.95, retail: 8.061538462, description: 'GROMMET SET. ONE PUSH-IN FOR AIR BREATHER & ONE FOR PCV VALVE.*' },
-            { partNo: '141-200', jobber: 8.95, retail: 9.215384615, description: 'CHEVY S/B TIMING TAB WITH 6-3/4 OR 7 BALANCER. CHEVY 1969-90.*' },
-            { partNo: '141-201', jobber: 8.95, retail: 9.215384615, description: 'CHEVY B/B TIMING TAB WITH 8 BALANCER. CHEVY 1965-91.*' },
-            { partNo: '141-202', jobber: 8.95, retail: 9.215384615, description: 'CHEVY S/B TIMING TAB WITH 8 BALANCER. CHEVY 1969-91.*' },
-            { partNo: '141-211', jobber: 12.95, retail: 13.86153846, description: 'CHEVY BOWTIE EMBLEM FUEL PUMP BLOCK-OFF PLATE. CHEVY B/B V8.*' },
-            { partNo: '141-213', jobber: 12.95, retail: 13.86153846, description: 'CHEVY BOWTIE EMBLEM FUEL PUMP BLOCK-OFF PLATE. CHEVY B/B V8. BLACK CRINKLE.*' },
-            { partNo: '141-210', jobber: 12.95, retail: 13.86153846, description: 'CHEVY BOWTIE EMBLEM FUEL PUMP BLOCK-OFF PLATE. CHEVY S/B V8.*' },
-            { partNo: '141-212', jobber: 12.95, retail: 13.86153846, description: 'CHEVY BOWTIE EMBLEM FUEL PUMP BLOCK-OFF PLATE. CHEVY S/B V8. BLACK CRINKLE.*' },
-            { partNo: '141-322', jobber: 13.95, retail: 15.01538462, description: 'SMALL CHEVY BOWTIE AIR CLEANER CENTER NUT.*' },
-            { partNo: '141-328', jobber: 13.95, retail: 15.01538462, description: 'SMALL HI-TECH CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT.*' },
-            { partNo: '141-332', jobber: 13.95, retail: 15.01538462, description: 'SMALL HI-TECH GM LOGO AIR CLEANER CENTER NUT.*' },
-            { partNo: '141-333', jobber: 14.95, retail: 16.18461538, description: 'LARGE CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT.*' },
-            { partNo: '141-629', jobber: 14.95, retail: 16.18461538, description: 'CHEVY BOWTIE EMBLEM PUSH-IN OIL FILLER CAP, BLACK CRINKLE*' },
-            { partNo: '141-630', jobber: 14.95, retail: 16.18461538, description: 'CHEVY BOWTIE EMBLEM PUSH-IN OIL FILLER CAP.*' },
-            { partNo: '141-227', jobber: 14.95, retail: 16.18461538, description: 'GM MASTER CYLINDER COVER. SINGLE CLIP. 5-5/8 x 3, FOR POWER DISK BRAKES OR MANUAL.*' },
-            { partNo: '141-323', jobber: 14.95, retail: 16.18461538, description: 'LARGE HI-TECH CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT.*' },
-            { partNo: '141-327', jobber: 14.95, retail: 16.18461538, description: 'LARGE HI-TECH GM LOGO AIR CLEANER CENTER NUT.*' },
-            { partNo: '141-616', jobber: 15.95, retail: 17.33846154, description: 'CHEVY BOWTIE EMBLEM PUSH-IN AIR BREATHER CAP, 3 DIAMETER.*' },
-            { partNo: '141-617', jobber: 15.95, retail: 17.33846154, description: 'CHEVY BOWTIE EMBLEM PUSH-ON AIR BREATHER CAP, 3 DIAMETER. USE W/ OIL FILLER TUBE.*' },
-            { partNo: '141-618', jobber: 15.95, retail: 17.33846154, description: 'CHEVY BOWTIE EMBLEM TWIST-ON AIR BREATHER CAP, 3 DIAMETER. USE W/ CHEVY STYLE HOLES.*' },
-            { partNo: '141-619', jobber: 15.95, retail: 17.33846154, description: 'CHEVY BOWTIE EMBLEM PUSH-IN AIR BREATHER CAP, RECTANGULAR. USE W/ CHEVY STYLE HOLES.*' },
-            { partNo: '141-338', jobber: 16.95, retail: 18.49230769, description: 'EXTRA-LARGE CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT, CHROME WITH BLACK*' },
-            { partNo: '141-339', jobber: 16.95, retail: 18.49230769, description: 'EXTRA-LARGE CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT, BLACK CRINKLE WITH BLACK.*' },
-            { partNo: '141-369', jobber: 16.95, retail: 18.49230769, description: 'LARGE CHEVY BOWTIE EMBLEM, BLACK CRINKLE, AIR CLEANER CENTER NUT.*' },
-            { partNo: '141-335', jobber: 16.95, retail: 18.49230769, description: 'EXTRA-LARGE CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT, BLACK CRINKLE WITH RED.*' },
-            { partNo: '141-336', jobber: 16.95, retail: 18.49230769, description: 'EXTRA-LARGE CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT, CHROME WITH GOLD.*' },
-            { partNo: '141-636', jobber: 16.95, retail: 18.49230769, description: 'CHEVROLET & BOWTIE EMBLEM WIRE LOOMS. CHEVY S/B V8, 1959-86; CHEVY B/B V8 1965-91.*' },
-            { partNo: '141-550', jobber: 19.95, retail: 20.81538462, description: 'CHEVY OIL DIP STICK KIT. SMALL BLOCK V8 THRU 1977.*' },
-            { partNo: '141-551', jobber: 19.95, retail: 20.81538462, description: 'CHEVY OIL DIP STICK KIT. SMALL BLOCK V8 1978-81.*' },
-            { partNo: '141-133', jobber: 20.95, retail: 21.96923077, description: 'CHEVY V/C HOLD-DOWN BOLTS / 8 PCS*' },
-            { partNo: '141-367', jobber: 21.95, retail: 23.12307692, description: 'MINI NUTS, VALVE COVER, STEEL, GRAY, BLUE BOWTIE EMBLEM*' },
-            { partNo: '141-601', jobber: 21.95, retail: 23.12307692, description: 'MINI NUTS, VALVE COVER, STEEL, ORANGE, BLACK BOWTIE EMBLEM*' },
-            { partNo: '141-759', jobber: 21.95, retail: 23.12307692, description: 'MINI NUTS, VALVE COVER, STEEL, BLACK, RED BOWTIE EMBLEM*' },
-            { partNo: '141-909', jobber: 21.95, retail: 23.12307692, description: 'MINI NUTS, VALVE COVER, STEEL, CHROME, RED BOWTIE EMBLEM*' },
-            { partNo: '440-884', jobber: 21.95, retail: 22.29230769, description: 'MOPAR STAMPED STEEL AIR BREATHER CAP; SHARK GRAY W/ BLACK MOPAR EMBLEM*' },
-            { partNo: '141-786', jobber: 21.95, retail: 23.12307692, description: 'CHEVY BOWTIE EMBLEM PUSH-IN AIR BREATHER CAP, 3 DIAMETER, ORANGE*' },
-            { partNo: '440-616', jobber: 21.95, retail: 22.29230769, description: 'MOPAR STAMPED STEEL, PUSH-IN BREATHER CAP, 3 DIAMETER,CHROME WITH RECESSED BLUE OMEGA M*' },
-            { partNo: '141-553', jobber: 21.95, retail: 23.12307692, description: 'CHEVY OIL DIP STICK KIT. BIG BLOCK V8 1965-91.*' },
-            { partNo: '141-602', jobber: 21.95, retail: 23.12307692, description: 'MINI NUTS, VALVE COVER, STEEL, RED, BOWTIE EMBLEM*' },
-            { partNo: '141-754', jobber: 21.95, retail: 23.12307692, description: 'CHEVY BOWTIE EMBLEM PUSH-IN AIR BREATHER CAP, 3 DIAMETER. BLACK CRINKLE.*' },
-            { partNo: '141-884', jobber: 21.95, retail: 23.12307692, description: 'CHEVY & BOWTIE EMBLEM; PUSH-IN BREATHER CAP; 3 DIAMETER; SHARK GRAY*' },
-            { partNo: '440-754', jobber: 21.95, retail: 22.29230769, description: 'MOPAR PUSH-IN AIR BREATHER CAP; BLACK CRINKLE*' },
-            { partNo: '141-610', jobber: 22.95, retail: 24.27692308, description: 'CHEVY VALVE COVER HOLD-DOWN CLAMPS. CHEVY S/B V8 & V6/90DEG. THRU 1986.*' },
-            { partNo: '440-337', jobber: 23.95, retail: 24.52307692, description: 'MOPAR DELUXE AIR CLEANER CENTER NUT; CHROME W/ BLUE EMBLEM*' },
-            { partNo: '440-338', jobber: 23.95, retail: 24.52307692, description: 'MOPAR DELUXE AIR CLEANER CENTER NUT; CHROME W/ BLACK EMBLEM*' },
-            { partNo: '440-339', jobber: 23.95, retail: 24.52307692, description: 'MOPAR DELUXE AIR CLEANER CENTER NUT; BLACK CRINKLE*' },
-            { partNo: '66757', jobber: 26.95, retail: 27.23076923, description: 'WEDGE-LOCKING EXHAUST COLLECTOR BOLTS, 6 PIECES*' },
-            { partNo: '141-500', jobber: 26.95, retail: 28.92307692, description: 'CHEVY WATER NECK W/ O-RING. V8 1955-65; CHEVY II V8 1964; CORVETTE 1956-63.*' },
-            { partNo: '141-501', jobber: 26.95, retail: 28.92307692, description: 'CHEVY WATER NECK V8 W/ O-RING. CHEVY, CAMARO, & CHEVELLE V8 1966-1975.*' },
-            { partNo: '141-757', jobber: 26.95, retail: 27.76923077, description: 'CHEVY BOWTIE EMBLEM V/C HOLD-DOWN CLAMPS. BLACK CRINKLE. CHEVY S/B V8, & V6/90DEG. THRU 1986.*' },
-            { partNo: '141-782', jobber: 26.95, retail: 27.76923077, description: 'CHEVY BOWTIE EMBLEM V/C HOLD-DOWN CLAMPS, ORANGE, CHEVY S/B V8 & V6/90 THRU 1986*' },
-            { partNo: '141-885', jobber: 26.95, retail: 27.76923077, description: 'CHEVY & BOWTIE EMBLEM; VALVE COVER HOLD DOWN CLAMPS; SHARK GRAY; 4-PER PACKAGE*' },
-            { partNo: '141-903', jobber: 26.95, retail: 28.92307692, description: 'CHEVROLET & BOWTIE EMBLEM CHROME HOLD DOWN CLAMPS.*' },
-            { partNo: '141-614', jobber: 29.95, retail: 32.4, description: 'CHEVY BOWTIE EMBLEM PUSH-IN FILTER AIR BREATHER WITHOUT HOOD, 3 DIAMETER, BLACK CRINKLE*' },
-            { partNo: '141-622', jobber: 29.95, retail: 32.4, description: 'CHEVY BOWTIE EMBLEM PUSH-IN FILTER AIR BREATHER WITHOUT HOOD, 3 DIAMETER.*' },
-            { partNo: '141-756', jobber: 30.95, retail: 33.55384615, description: 'CHEVY BOWTIE EMBLEM VALVE COVER WING NUTS. BLACK CRINKLE.S/B, B/B & V6*' },
-            { partNo: '141-886', jobber: 30.95, retail: 33.55384615, description: 'CHEVY & BOWTIE EMBLEM; WING NUTS; SHARK GRAY; 4-PER PACKAGE*' },
-            { partNo: '141-600', jobber: 31.95, retail: 34.72307692, description: 'CHEVY BOWTIE EMBLEM CHROME VALVE COVER WING NUTS. CHEVY S/B, B/B & V6. 4 PER PACKAGE*' },
-            { partNo: '141-613', jobber: 31.95, retail: 34.72307692, description: 'CHEVY BOWTIE EMBLEM PUSH-IN FILTER AIR BREATHER WITH HOOD, 3 DIAMETER, BLACK CRINKLE*' },
-            { partNo: '141-621', jobber: 31.95, retail: 34.72307692, description: 'CHEVY BOWTIE EMBLEM PUSH-IN FILTER AIR BREATHER WITH HOOD, 3 DIAMETER.*' },
-            { partNo: '141-215', jobber: 31.95, retail: 34.72307692, description: 'CHEVROLET & BOWTIE EMBLEM CHROME TIMING CHAIN COVER. CHEVY S/B V8, 1969-91 AND V6/90DEG.*' },
-            { partNo: '141-625', jobber: 31.95, retail: 34.72307692, description: 'CHEVY BOWTIE EMBLEM AIR BREATHER CAP, FILTER TYPE WITH HOOD, CLAMP ON STYLE 1 3/8*' },
-            { partNo: '141-902', jobber: 31.95, retail: 34.72307692, description: 'CHEVROLET & BOWTIE EMBLEM CHROME W/ RED EMBLEM VALVE COVER WING NUTS.*' },
-            { partNo: '440-756', jobber: 33.95, retail: 35.69230769, description: 'MOPAR - V/C WING NUTS; BLACK CRINKLE, BLUE EMBLEM*' },
-            { partNo: '440-886', jobber: 33.95, retail: 35.69230769, description: 'MOPAR VALVE COVER WING NUTS; SHARK GRAY W/ BLACK MOPAR EMBLEM*' },
-            { partNo: '440-902', jobber: 33.95, retail: 35.69230769, description: 'MOPAR - V/C WING NUTS; CHROME, BLUE EMBLEM*' },
-            { partNo: '66751', jobber: 34.95, retail: 34.18461538, description: 'WEDGE-LOCKING HEADER BOLTS 3/4L X 3/8, 12 PIECES*' },
-            { partNo: '66754', jobber: 34.95, retail: 34.18461538, description: 'WEDGE-LOCKING HEADER BOLTS LS, .984L x 8mm, 12 PIECES*' },
-            { partNo: '66824', jobber: 34.95, retail: 34.93846154, description: 'WEDGE-LOCKING HEADER BOLTS 1L x 3/8; 12 PCS; NICKEL PLATED*' },
-            { partNo: '66827', jobber: 34.95, retail: 34.93846154, description: 'WEDGE-LOCKING HEADER BOLTS 3/4L x 3/8; 12 PCS; NICKEL PLATED*' },
-            { partNo: '66753', jobber: 34.95, retail: 34.18461538, description: 'WEDGE-LOCKING HEADER BOLTS 1L X 3/8, 12 PIECES*' },
-            { partNo: '66755', jobber: 34.95, retail: 34.18461538, description: 'WEDGE-LOCKING HEADER BOLTS LS, 1.181L x 8mm, 12 PIECES*' },
-            { partNo: 'BB1903', jobber: 34.95, retail: 40.29230769, description: 'LIGHTWEIGHT PRECISION CALIBRATED TEST SPRING*' },
-            { partNo: '66752', jobber: 37.95, retail: 37.78461538, description: 'WEDGE-LOCKING HEADER BOLTS 3/4L X 3/8, 16 PIECES*' },
-            { partNo: '66756', jobber: 37.95, retail: 37.78461538, description: 'WEDGE-LOCKING HEADER BOLTS 1L x 3/8, 16 PIECES*' },
-            { partNo: '141-753', jobber: 37.95, retail: 40.52307692, description: 'CHEVROLET & BOWTIE EMBLEM TIMING CHAIN COVER. BLACK CRINKLE. CHEVY S/B V8, 1969-91 AND V6/90DEG.*' },
-            { partNo: '141-783', jobber: 37.95, retail: 40.52307692, description: 'CHEVROLET AND BOWTIE EMBLEM TIMING CHAIN COVER, ORANGE, CHEVY S/B V8, 1969-91 AND V6/90*' },
-            { partNo: '141-850', jobber: 37.95, retail: 40.52307692, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BREATHER CAP; NO EMBLEM; POLISHED*' },
-            { partNo: '141-851', jobber: 37.95, retail: 40.52307692, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BREATHER CAP; NO EMBLEM; CHROME*' },
-            { partNo: '141-862', jobber: 37.95, retail: 40.52307692, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BREATHER CAP; NO EMBLEM; BLACK CRINKLE*' },
-            { partNo: '141-883', jobber: 37.95, retail: 40.52307692, description: 'CHEVROLET & BOWTIE EMBLEM SHARK GRAY TIMING CHAIN COVER, CHEVY S/B*' },
-            { partNo: '141-820', jobber: 38.95, retail: 41.67692308, description: 'CHEVY BOWTIE BILLET ALUMINUM RADIATOR CAP, BLACK*' },
-            { partNo: '66823', jobber: 39.95, retail: 39.95384615, description: 'WEDGE-LOCKING HEADER BOLTS 3/4L x 3/8; 16 PCS; NICKEL PLATED*' },
-            { partNo: '66825', jobber: 39.95, retail: 39.95384615, description: 'WEDGE-LOCKING HEADER BOLTS 1L x 3/8; 16 PCS; NICKEL PLATED*' },
-            { partNo: '66826', jobber: 39.95, retail: 39.95384615, description: 'WEDGE-LOCKING HEADER BOLTS 1.184L x 8mm; 16 PCS; NICKEL PLATED*' },
-            { partNo: '141-725', jobber: 39.95, retail: 42.84615385, description: 'CHEVY BOWTIE EMBLEM 6-3/4 CHROME HARMONIC BALANCER COVER. CHEVY S/B.*' },
-            { partNo: '141-726', jobber: 39.95, retail: 42.84615385, description: 'CHEVY BOWTIE EMBLEM 8 CHROME HARMONIC BALANCER COVER. CHEVY S/B.*' },
-            { partNo: '141-727', jobber: 39.95, retail: 42.84615385, description: 'CHEVY BOWTIE EMBLEM 6-3/4 BLACK HARMONIC BALANCER COVER. CHEVY S/B.*' },
-            { partNo: '141-728', jobber: 39.95, retail: 42.84615385, description: 'CHEVY BOWTIE EMBLEM 8 BLACK HARMONIC BALANCER COVER. CHEVY S/B.*' },
-            { partNo: '141-729', jobber: 39.95, retail: 42.84615385, description: 'CHEVY BOWTIE EMBLEM 8 CHROME HARMONIC BALANCER COVER. CHEVY B/B.*' },
-            { partNo: '141-863', jobber: 41.95, retail: 45.15384615, description: 'CHEVY SLANT EDGE BREATHER CAP; RED; RAISED BOWTIE EMBLEM*' },
-            { partNo: '440-440', jobber: 41.95, retail: 43.50769231, description: 'MOPAR OMEGA EMBLEM SLANT-EDGE ALUMINUM BREATHER CAP; RAISED MOPAR EMBLEM; BLACK CRINKLE*' },
-            { partNo: '440-441', jobber: 41.95, retail: 43.50769231, description: 'MOPAR OMEGA EMBLEM SLANT-EDGE ALUMINUM BREATHER CAP; RECESSED MOPAR EMBLEM; POLISHED*' },
-            { partNo: '440-442', jobber: 41.95, retail: 43.50769231, description: 'MOPAR OMEGA EMBLEM SLANT-EDGE ALUMINUM BREATHER CAP; RECESSED MOPAR EMBLEM; CHROME*' },
-            { partNo: '141-852', jobber: 41.95, retail: 45.15384615, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BREATHER CAP; RECESSED BLACK BOWTIE EMBLEM; CHROME*' },
-            { partNo: '141-853', jobber: 41.95, retail: 45.15384615, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BREATHER CAP; RECESSED RED BOWTIE EMBLEM; CHROME*' },
-            { partNo: '141-854', jobber: 41.95, retail: 45.15384615, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BREATHER CAP; RECESSED BLACK BOWTIE EMBLEM; POLISHED*' },
-            { partNo: '141-855', jobber: 41.95, retail: 45.15384615, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BREATHER CAP; RECESSED RED BOWTIE EMBLEM; POLISHED*' },
-            { partNo: '141-856', jobber: 41.95, retail: 45.15384615, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BREATHER CAP; BLACKFIELD BOWTIE EMBLEM; CHROME*' },
-            { partNo: '141-857', jobber: 41.95, retail: 45.15384615, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BREATHER CAP; BLACKFIELD BOWTIE EMBLEM; POLISHED*' },
-            { partNo: '141-858', jobber: 41.95, retail: 45.15384615, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BREATHER CAP; RAISED BOWTIE EMBLEM; BLACK CRINKLE*' },
-            { partNo: '141-859', jobber: 41.95, retail: 45.15384615, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BREATHER CAP; RAISED BOWTIE EMBLEM; CHEVY ORANGE*' },
-            { partNo: '141-860', jobber: 41.95, retail: 45.15384615, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BREATHER CAP; RAISED BOWTIE EMBLEM; CAST GRAY CRINKLE*' },
-            { partNo: '141-861', jobber: 41.95, retail: 45.15384615, description: 'CHEVY BOWTIE SLANT-EDGE ALUMINUM BREATHER CAP; RECESSED RED BOWTIE EMBLEM; BLACK CRINKLE*' },
-            { partNo: '141-216', jobber: 42.95, retail: 46.30769231, description: 'CHEVROLET & BOWTIE EMBLEM CHROME TIMING CHAIN COVER. CHEVY B/B, 1965-90.*' },
-            { partNo: '141-904', jobber: 42.95, retail: 46.30769231, description: 'CHEVROLET & BOWTIE EMBLEM CHROME TIMING CHAIN COVER, RED BOWTIE & BLACK LETTERING.*' },
-            { partNo: '141-641', jobber: 44.95, retail: 49.16923077, description: 'HIGH PERFORMANCE 10 ELECTRIC FAN WITH BOWTIE EMBLEM.*' },
-            { partNo: 'BB1902', jobber: 45.95, retail: 49.03076923, description: 'MIDWEIGHT PRECISION CALIBRATED TEST SPRING*' },
-            { partNo: '141-221', jobber: 46.95, retail: 50.96923077, description: 'CHEVY B/B TIMING CHAIN COVER; SHARK GRAY FINISH*' },
-            { partNo: '141-219', jobber: 46.95, retail: 50.96923077, description: 'CHEVY B/B TIMING CHAIN COVER, BLACK CRINKLE*' },
-            { partNo: '141-220', jobber: 46.95, retail: 50.96923077, description: 'CHEVY B/B TIMING CHAIN COVER, ORANGE*' },
-            { partNo: '440-424', jobber: 47.95, retail: 50.21538462, description: 'MOPAR IGNITION BOX AND HARNESS KIT; ORANGE*' },
-            { partNo: '440-425', jobber: 47.95, retail: 50.21538462, description: 'MOPAR IGNITION BOX AND HARNESS KIT; BLUE*' },
-            { partNo: '141-642', jobber: 49.95, retail: 54.63076923, description: 'HIGH PERFORMANCE 12 ELECTRIC FAN WITH BOWTIE EMBLEM.*' },
-            { partNo: '440-216', jobber: 52.95, retail: 55.8, description: 'MOPAR BIG BLOCK TIMING CHAIN COVER, CHROME*' },
-            { partNo: '440-219', jobber: 52.95, retail: 55.8, description: 'MOPAR BIG BLOCK TIMING CHAIN COVER, BLACK CRINKLE*' },
-            { partNo: '440-883', jobber: 52.95, retail: 55.8, description: 'MOPAR STAMPED STEEL TIMING CHAIN COVER; FITS CHRYSLER B/RB/HEMI ENGINES; SHARK GRAY WITH BLACK MOPAR EMBLEM*' },
-            { partNo: 'BB1920', jobber: 58.95, retail: 62.73846154, description: 'BRACKET KIT, RIMAC SPRING TESTER*' },
-            { partNo: '141-646', jobber: 67.95, retail: 74.32307692, description: 'HIGH PERFORMANCE 16 ELECTRIC FAN WITH BOWTIE EMBLEM.*' },
-            { partNo: '141-644', jobber: 71.95, retail: 78.69230769, description: 'HIGH PERFORMANCE 14 ELECTRIC FAN WITH BOWTIE EMBLEM.*' },
-            { partNo: '141-307', jobber: 79.95, retail: 87.44615385, description: 'CHEVY 14 HIGH-PERFORMANCE AIR CLEANER KIT. 3 TALL AIR FILTER.*' },
-            { partNo: '440-301', jobber: 84.95, retail: 89.32307692, description: 'MOPAR DIRECT-CONNECTION STEEL VALVE COVERS; FITS B/RB ENGINES; CHROME*' },
-            { partNo: 'BB1901', jobber: 84.95, retail: 91.27692308, description: '3-IN-1 PRECISION CALIBRATED TEST SPRING; FOR LIGHT/MID/HEAVY SPRING TESTERS*' },
-            { partNo: '141-102', jobber: 85.95, retail: 93.84615385, description: 'CHEVROLET & BOWTIE EMBLEM VALVE COVERS. SHORT WITH BAFFLE. CHEVY S/B V8, 1958-86, CHROME*' },
-            { partNo: '141-302', jobber: 90.95, retail: 98.49230769, description: 'CHEVY 14 CLASSIC AIR CLEANER KIT W/ BOWTIE CENTER NUT. 3 TALL AIR FILTER.*' },
-            { partNo: '141-750', jobber: 90.95, retail: 98.49230769, description: 'CHEVROLET & BOWTIE EMBLEM S/B V8 STAMPED VALVE COVERS, SHORT W/ BAFFLE, BLACK CRINKLE*' },
-            { partNo: '141-690', jobber: 91.95, retail: 99.66153846, description: 'SUPER LIGHT ALUMINUM AIR CLEANER KIT 14 PLAIN, BLACK FINISH*' },
-            { partNo: '141-691', jobber: 91.95, retail: 99.66153846, description: 'SUPER LIGHT ALUMINUM AIR CLEANER KIT 14 PLAIN, METALLIC GRAY*' },
-            { partNo: '141-899', jobber: 91.95, retail: 99.66153846, description: 'CHEVROLET & BOWTIE EMBLEM S/B CHROME SHORT VALVE COVERS, RED BOWTIE & BLACK LETTERING.*' },
-            { partNo: '141-638', jobber: 95.95, retail: 104.2923077, description: 'CHEVY BOWTIE EMBLEM LINEAR WIRE LOOMS. CHEVY S/B V8, 1959-86. 2 PER PACKAGE, CHROME.*' },
-            { partNo: '141-709', jobber: 95.95, retail: 104.2923077, description: 'CHEVY BOWTIE WIRELOOMS, BLACK CRINKLE*' },
-            { partNo: '141-714', jobber: 95.95, retail: 104.2923077, description: 'CHEVROLET & BOWTIE EMBLEM LINEAR WIRE LOOMS, CHEVY S/B V8 1959-86, 2 PER PACKAGE, BLACK CRINKLE.*' },
-            { partNo: '67163C', jobber: 99.95, retail: 110.1230769, description: 'SECONDARY CONVERSION BILLET METERING BLOCK FOR DUAL INLET CARBURETORS.*' },
-            { partNo: '141-796', jobber: 99.95, retail: 111.9076923, description: 'GM HEI DISTRIBUTOR TUNE-UP KIT. BLACK CAP*' },
-            { partNo: '141-101', jobber: 100.95, retail: 110.0923077, description: 'CHEVROLET & BOWTIE EMBLEM VALVE COVERS. TALL NO BAFFLE. CHEVY S/B V8, 1958-86, CHROME*' },
-            { partNo: '440-452', jobber: 100.95, retail: 109.6307692, description: 'BIG BLOCK CHRYSLER MECHANICAL WATER PUMP*' },
-            { partNo: '141-751', jobber: 102.95, retail: 112.4153846, description: 'CHEVROLET & BOWTIE EMBLEM S/B V8 STAMPED VALVE COVERS, TALL W/BAFFLE, BLACK CRINKLE*' },
-            { partNo: '141-784', jobber: 102.95, retail: 112.4153846, description: 'CHEVROLET AND BOWTIE EMBLEM S/B V8 STAMPED VALVE COVERS, TALL, ORANGE.*' },
-            { partNo: '67150BK', jobber: 105.95, retail: 123.9076923, description: 'RACE-ORIENTED CALIBRATION BILLET METERING BLOCK; BLACK*' },
-            { partNo: '141-103', jobber: 105.95, retail: 115.8769231, description: 'CHEVROLET & BOWTIE EMBLEM VALVE COVERS. TALL WITH BAFFLE. CHEVY S/B V8, 1958-86, CHROME*' },
-            { partNo: '141-692', jobber: 105.95, retail: 115.8769231, description: 'SUPER LIGHT ALUMINUM AIR CLEANER KIT 14 BLACK, RED CHEVY BOWTIE EMBLEM*' },
-            { partNo: '141-693', jobber: 105.95, retail: 115.8769231, description: 'SUPER LIGHT ALUMINUM AIR CLEANER KIT 14 CLEAR ANODIZED, RED CHEVY BOWTIE EMBLEM*' },
-            { partNo: '141-752', jobber: 105.95, retail: 115.8769231, description: 'CHEVROLET & BOWTIE EMBLEM 14 CLASSIC, BLACK CRINKLE, AIR CLEANER KIT W/ BOWTIE CENTER NUT.*' },
-            { partNo: '141-785', jobber: 105.95, retail: 115.8769231, description: 'CHEVROLET AND BOWTIE EMBLEM 14 CLASSIC ORANGE AIR CLEANER KIT, BLACK LETTERING & BLACK BOWTIE. W/ BOWTIE CENTER NUT*' },
-            { partNo: '141-881', jobber: 105.95, retail: 115.8769231, description: 'CHEVROLET & BOWTIE EMBLEM S/B STAMPED VALVE COVERS, TALL, SHARK GRAY*' },
-            { partNo: '141-882', jobber: 105.95, retail: 115.8769231, description: 'CHEVROLET & BOWTIE EMBLEM 14 CLASSIC SHARK GRAY AIR CLEANER KIT W/ BOWTIE CENTER NUT*' },
-            { partNo: '141-905', jobber: 105.95, retail: 115.8769231, description: 'CHEVROLET & BOWTIE EMBLEM S/B CHROME TALL VALVE COVERS, RED BOWTIE & BLACK LETTERING.*' },
-            { partNo: '141-906', jobber: 105.95, retail: 115.8769231, description: 'CHEVROLET & BOWTIE EMBLEM 14 CHROME AIR CLEANER KIT, RED BOWTIE & BLACK LETTERING.*' },
-            { partNo: '440-752', jobber: 105.95, retail: 111.6615385, description: 'MOPAR; BLACK CRINKLE; SMALL BLOCK; AIR CLEANER KIT*' },
-            { partNo: '440-882', jobber: 105.95, retail: 111.6615385, description: 'MOPAR STAMPED STEEL AIR CLEANER KIT; 14 DIAMETER; SHARK GRAY W/ BLACK MOPAR EMBLEM*' },
-            { partNo: '440-906', jobber: 105.95, retail: 111.6615385, description: 'MOPAR; CHROME; SMALL BLOCK; AIR CLEANER KIT*' },
-            { partNo: '67150C', jobber: 105.95, retail: 123.9076923, description: 'RACE-ORIENTED CALIBRATION BILLET METERING BLOCK*' },
-            { partNo: '67166C', jobber: 105.95, retail: 117.5846154, description: 'STANDARD REPLACEMENT BILLET METERING BLOCK*' },
-            { partNo: '141-639', jobber: 114.95, retail: 129.5692308, description: 'CHEVY BOWTIE EMBLEM LINEAR WIRE LOOMS. CHEVY B/B, 1965-91. 2 PER PACKAGE, CHROME.*' },
-            { partNo: '141-713', jobber: 114.95, retail: 129.7076923, description: 'CHEVROLET & BOWTIE EMBLEM 14 CLASSIC, CARBON-STYLE,  AIR CLEANER KIT W/ BOWTIE CENTER NUT*' },
-            { partNo: '440-751', jobber: 116.95, retail: 122.8307692, description: 'MOPAR; STAMPED STEEL VALVE COVER; SMALL BLOCK; BLACK CRINKLE*' },
-            { partNo: '440-811', jobber: 116.95, retail: 122.8307692, description: 'MOPAR; STAMPED STEEL VALVE COVER; BIG BLOCK; BLACK CRINKLE*' },
-            { partNo: '440-813', jobber: 116.95, retail: 122.8307692, description: 'MOPAR; STAMPED STEEL VALVE COVER; BIG BLOCK; CHROME*' },
-            { partNo: '440-881', jobber: 116.95, retail: 122.8307692, description: 'MOPAR STAMPED STEEL VALVE COVERS; FITS CHRYSLER LA ENGINES; SHARK GRAY WITH BLACK MOPAR EMBLEM*' },
-            { partNo: '440-889', jobber: 116.95, retail: 122.8307692, description: 'MOPAR STAMPED STEEL VALVE COVER; FITS CHRYSLER B/RB ENGINES; SHARK GRAY W/ BLACK MOPAR EMBLEM*' },
-            { partNo: '67162', jobber: 116.95, retail: 125.5230769, description: 'ALUMINUM CENTER HUNG FLOAT BOWL, FOR HOLLEY, PROFORM, QUICK FUEL DOUBLE PUMP CARBS*' },
-            { partNo: '440-905', jobber: 127.95, retail: 134, description: 'MOPAR; STAMPED STEEL VALVE COVER; SMALL BLOCK; CHROME*' },
-            { partNo: '141-114', jobber: 138.95, retail: 151.8307692, description: 'CHEVROLET & BOWTIE EMBLEM VALVE COVERS. SHORT WITH BAFFLE. CHEVY B/B V8, 1965-LATER.*' },
-            { partNo: '141-810', jobber: 143.95, retail: 157.4615385, description: 'CHEVROLET & BOWTIE EMBLEM B/B STAMPED VALVE COVERS, SHORT, BLACK CRINKLE*' },
-            { partNo: '141-812', jobber: 143.95, retail: 157.7230769, description: 'CHEVROLET & BOWTIE EMBLEM B/B STAMPED VALVE COVERS, SHORT, CHROME*' },
-            { partNo: '141-889', jobber: 143.95, retail: 156.4769231, description: 'CHEVY & BOWTIE EMBLEM; STEEL VALVE COVERS; STOCK; B/B; RECESSED RED EMBLEMS; SHARK GRAY FINISH*' },
-            { partNo: '141-656', jobber: 149.95, retail: 164.0153846, description: '100% NEW, CHROME ALTERNATOR W/ CHEVY BOWTIE EMBLEM. GM 73-86 WITH INTERNAL REGULATOR.*' },
-            { partNo: '141-657', jobber: 149.95, retail: 164.0153846, description: '100% NEW; CHROME 1-WIRE ALTERNATOR W/ CHEVY BOWTIE EMBLEM; GM 100 AMP*' },
-            { partNo: '141-658', jobber: 149.95, retail: 164.0153846, description: '100% NEW, CHROME 1-WIRE ALTERNATOR W/ CHEVY BOWTIE EMBLEM. GM 60 AMP*' },
-            { partNo: '141-659', jobber: 149.95, retail: 164.0153846, description: '100% NEW, CHROME 1-WIRE ALTERNATOR W/ CHEVY BOWTIE EMBLEM. GM 80 AMP*' },
-            { partNo: '440-453', jobber: 153.95, retail: 169.5230769, description: 'BIG BLOCK CHRYSLER ALUMINUM WATER PUMP HOUSING*' },
-            { partNo: '67034', jobber: 154.95, retail: 168.3692308, description: 'PROFORM UNIVERSAL BRUSHLESS FAN; 12V; PULLER, STRAIGHT BLADE, 12*' },
-            { partNo: '141-813', jobber: 157.95, retail: 177.9846154, description: 'CHEVROLET & BOWTIE EMBLEM B/B STAMPED VALVE COVERS, TALL, CHROME, RED/BLACK EMBLEM*' },
-            { partNo: '440-430', jobber: 158.95, retail: 167.5076923, description: 'CHRYSLER ELECTRIC DISTRIBUTOR. FITS 273 THRU 360 ENGINES*' },
-            { partNo: '440-431', jobber: 158.95, retail: 167.5076923, description: 'CHRYSLER ELECTRIC DISTRIBUTOR. FITS 361 THRU 400 ENGINES*' },
-            { partNo: '141-787', jobber: 158.95, retail: 173.8615385, description: 'CHEVROLET AND BOWTIE EMBLEM B/B STAMPED VALVE COVERS, TALL, ORANGE.*' },
-            { partNo: '141-811', jobber: 158.95, retail: 173.8615385, description: 'CHEVROLET & BOWTIE EMBLEM B/B STAMPED VALVE COVERS, TALL, BLACK CRINKLE*' },
-            { partNo: '141-888', jobber: 158.95, retail: 173.8615385, description: 'CHEVY & BOWTIE; STEEL VALVE COVERS; TALL; B/B; RECESSED RED EMBLEMS; SHARK GRAY FINISH*' },
-            { partNo: '67100C', jobber: 158.95, retail: 171.1846154, description: 'CARBURETOR MAIN BODY, FOR USE ON HOLLEY 650, 700, 750, & 800 CFM.*' },
-            { partNo: '67101C', jobber: 158.95, retail: 174.6769231, description: 'CARBURETOR MAIN BODY, FOR USE ON HOLLEY 750 CFM VACUUM SECONDARY CARB.*' },
-            { partNo: '67165C', jobber: 158.95, retail: 198.6615385, description: 'DOUBLE PUMPER BILLET METERING BLOCK CONVERSION KIT.*' },
-            { partNo: '440-432', jobber: 158.95, retail: 167.5076923, description: 'CHRYSLER ELECTRIC DISTRIBUTOR. FITS 413 THRU 440 ENGINES*' },
-            { partNo: '67035', jobber: 159.95, retail: 174.4615385, description: 'PROFORM UNIVERSAL BRUSHLESS FAN; 12V; PULLER; STRAIGHT BLADE; 14*' },
-            { partNo: '141-660', jobber: 159.95, retail: 174.9538462, description: '100% NEW, CHROME 1-WIRE ALTERNATOR W/ CHEVY BOWTIE EMBLEM. GM 120 AMP*' },
-            { partNo: '67036', jobber: 164.95, retail: 178.9384615, description: 'PROFORM UNIVERSAL BRUSHLESS FAN; 12V; PULLER; STRAIGHT BLADE; 16*' },
-            { partNo: '67037', jobber: 164.95, retail: 178.0923077, description: 'PROFORM UNVERSAL BRUSHLESS FAN; 12V; PULLER; S-BLADE; 16*' },
-            { partNo: '141-833', jobber: 167.95, retail: 183.1384615, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST SLANT-EDGE AIR CLEANER KIT, POLISHED,RECESSED RED/BLACK EMBLEM*' },
-            { partNo: '141-837', jobber: 167.95, retail: 183.1384615, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST SLANT EDGE AIR CLEANER KIT; RAISED EMBLEM; POWDERCOAT READY*' },
-            { partNo: '141-001', jobber: 169.95, retail: 185.4461538, description: 'DRESS UP KIT W/TIMING COVER & SHORT BAFFLED VALVE COVERS. CHEVY S/B V8, 1958-86.*' },
-            { partNo: '67203', jobber: 169.95, retail: 190.2923077, description: 'CARBURETOR MAIN BODY, FOR USE ON HOLLEY 650 CFM (FLOWS UP TO 690 CFM)*' },
-            { partNo: '141-002', jobber: 175.95, retail: 192.4153846, description: 'DRESS UP KIT W/SHORT BAFFLED VALVE COVERS & WING NUTS. CHEVY S/B V8, 1958-86.*' },
-            { partNo: '141-830', jobber: 180.95, retail: 197.0461538, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST SLANT-EDGE AIR CLEANER KIT, BLACK CRINKLE, RAISED EMBLEM*' },
-            { partNo: '141-831', jobber: 180.95, retail: 197.0461538, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST SLANT-EDGE AIR CLEANER KIT, CHEVY ORANGE, RAISED EMBLEM*' },
-            { partNo: '141-832', jobber: 180.95, retail: 197.0461538, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST SLANT-EDGE AIR CLEANER KIT, CAST GRAY CRINKLE, RAISED EMBLEM*' },
-            { partNo: '141-834', jobber: 180.95, retail: 197.0461538, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST SLANT-EDGE AIR CLEANER KIT, BLACK CRINKLE, RECESSED RED EMBLEM*' },
-            { partNo: '141-836', jobber: 180.95, retail: 197.0461538, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST SLANT-EDGE AIR CLEANER KIT, RED, RAISED EMBLEM*' },
-            { partNo: '440-426', jobber: 180.95, retail: 209.3076923, description: 'CHRYSLER ELECTRIC CONVERSION KIT. FITS 273 THRU 360 ENGINES*' },
-            { partNo: '440-427', jobber: 180.95, retail: 209.3076923, description: 'CHRYSLER ELECTRIC CONVERSION KIT. FITS 361 THRU 400 ENGINES*' },
-            { partNo: '440-428', jobber: 180.95, retail: 209.3076923, description: 'CHRYSLER ELECTRIC CONVERSION KIT. FITS 413 THRU 440 ENGINES*' },
-            { partNo: '66256', jobber: 189.95, retail: 188.4461538, description: 'HIGH TORQUE STARTER. CHEVY V6, S/B & B/B V8 ENGINES. 12 V 1.4 KW MOTOR, 11:1 COMP*' },
-            { partNo: '66445.1N', jobber: 189.95, retail: 160.9384615, description: '100% NEW, CHROME 1-WIRE ALTERNATOR, GM 100 AMP.*' },
-            { partNo: '141-107', jobber: 194.95, retail: 213.2769231, description: 'CHEVY RED BOWTIE VALVE COVERS, CENTER BOLT. CHEVY S/B V8, 1987-LS; CHROME*' },
-            { partNo: '141-682', jobber: 195.95, retail: 227.4769231, description: 'GM PERFORMANCE PARTS, LICENSED CHEVY HEI ELECTRONIC DISTRIBUTOR W/ COIL, 100% NEW, BLACK CAP*' },
-            { partNo: '141-683', jobber: 195.95, retail: 227.4769231, description: 'GM PERFORMANCE PARTS, LICENSED CHEVY HEI ELECTRONIC DISTRIBUTOR W/ COIL, 100% NEW, RED CAP*' },
-            { partNo: '141-681', jobber: 195.95, retail: 227.4769231, description: 'GM PERFORMANCE PARTS, LICENSED CHEVY HEI ELECTRONIC DISTRIBUTOR W/ COIL, 100% NEW, YELLOW CAP*' },
-            { partNo: '141-685', jobber: 195.95, retail: 227.4769231, description: 'CHEVROLET PERFORMANCE; HEI DISTRIBUTOR FOR SBC/BBC; LOCKED VAC ADVANCE; RED CAP*' },
-            { partNo: '141-686', jobber: 195.95, retail: 227.4769231, description: 'CHEVROLET PERFORMANCE; HEI DISTRIBUTOR FOR SBC/BBC; LOCKED VAC ADVANCE; BLACK CAP*' },
-            { partNo: '141-907', jobber: 196.95, retail: 214.4307692, description: 'CHEVY RED BOWTIE EMBLEM S/B CENTER HOLD-DOWN STAMPED VALVE COVERS, 87-LS, BLACK CRINKLE*' },
-            { partNo: '141-918', jobber: 196.95, retail: 214.4307692, description: 'CHEVY BOWTIE VALVE COVERS, CENTER BOLT. CHEVY S/B V8, 1987-LS, ORANGE*' },
-            { partNo: '141-647', jobber: 199.95, retail: 218.7076923, description: 'HIGH PERFORMANCE 15 ELECTRIC FAN WITH THERMOSTAT AND BOWTIE EMBLEM.*' },
-            { partNo: '141-684', jobber: 199.95, retail: 192.3076923, description: 'GM HIGH TORQUE GEAR REDUCTION STARTER, CHEVY S/B & B/B, 2.0 KW MOTOR, 15:1 COMP*' },
-            { partNo: '67148', jobber: 201.95, retail: 240.9692308, description: 'BILLET THROTTLE BASE PLATE, VACUUM SECONDARY, 750 CFM.*' },
-            { partNo: '67155', jobber: 201.95, retail: 240.9692308, description: 'BILLET THROTTLE BASE PLATE: 650 CFM, 700 CFM, 750 CFM, & 800 CFM*' },
-            { partNo: '67156', jobber: 201.95, retail: 240.9692308, description: 'BILLET THROTTLE BASE PLATE:  850 CFM AND 950 CFM.*' },
-            { partNo: '141-695', jobber: 201.95, retail: 235.8769231, description: 'CHEVY BOWTIE EMBLEM REAR END COVER, 7.5 GM, 10 BOLT*' },
-            { partNo: '141-696', jobber: 201.95, retail: 235.8769231, description: 'CHEVY BOWTIE EMBLEM REAR END COVER, 8.2/8.5 GM, 10 BOLT*' },
-            { partNo: '141-697', jobber: 201.95, retail: 235.8769231, description: 'CHEVY BOWTIE EMBLEM REAR END COVER, GM, 12 BOLT, PASSENGER CAR*' },
-            { partNo: '67148BK', jobber: 206.95, retail: 228.3076923, description: 'BILLET THROTTLE BASE PLATE 11/16; VACUUM SECONDARY; 750 CFM; BLACK*' },
-            { partNo: '67155BK', jobber: 206.95, retail: 228.3076923, description: 'BILLET THROTTLE BASE PLATE; BLACK; 650 CFM, 750 CFM, & 850 CFM*' },
-            { partNo: '67156BK', jobber: 206.95, retail: 240.9692308, description: 'BILLET THROTTLE BASE PLATE; 850 CFM & 950 CFM*' },
-            { partNo: '141-105', jobber: 211.95, retail: 253.2, description: 'CHEVY RED BOWTIE VALVE COVERS, CENTER BOLT. CHEVY S/B V8, 1987-LS, TALL*' },
-            { partNo: '440-471', jobber: 211.95, retail: 236.2923077, description: 'MOPAR ALTERNATOR; 110 AMP; SATIN FINISH*' },
-            { partNo: '141-108', jobber: 211.95, retail: 231.8307692, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST VALVE COVERS. POLISHED. CHEVY S/B V8, 1958-86.*' },
-            { partNo: '141-116', jobber: 211.95, retail: 231.8307692, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST VALVE COVERS. BLACK CRINKLE. CHEVY S/B V8, 1958-86.*' },
-            { partNo: '141-118', jobber: 211.95, retail: 231.8307692, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST VALVE COVERS, CHEVY S/B V8, 1958-86, RECESSED EMBLEM, ORANGE*' },
-            { partNo: '141-119', jobber: 211.95, retail: 231.8307692, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST VALVE COVERS, CHEVY S/B V8, 1958-86, RAISED EMBLEM, BLACK CRINKLE*' },
-            { partNo: '141-120', jobber: 211.95, retail: 231.8307692, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST VALVE COVERS, CHEVY S/B V8, 1958-86, RAISED EMBLEM, ORANGE*' },
-            { partNo: '141-835', jobber: 211.95, retail: 241.3230769, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST SLANT-EDGE AIR CLEANER KIT, CHROME, RECESSED RED/BLACK EMBLEM*' },
-            { partNo: '440-830', jobber: 211.95, retail: 223.3692308, description: 'MOPAR SLANT-EDGE AIR CLEANER KIT; BLACK CRINKLE; RAISED EMBLEM*' },
-            { partNo: '440-832', jobber: 211.95, retail: 223.3692308, description: 'MOPAR SLANT-EDGE AIR CLEANER KIT; POLISHED; RECESSED BLUE EMBLEM*' },
-            { partNo: '440-833', jobber: 211.95, retail: 223.3692308, description: 'MOPAR SLANT-EDGE AIR CLEANER KIT; POLISHED; RECESSED BLACK EMBLEM*' },
-            { partNo: '440-834', jobber: 211.95, retail: 223.3692308, description: 'MOPAR SLANT-EDGE AIR CLEANER KIT; BLACK CRINKLE; RECESSED BLUE EMBLEM*' },
-            { partNo: '67107C', jobber: 211.95, retail: 242.0461538, description: 'CARBURETOR MAIN BODY, FOR USE ON HOLLEY 850 CFM*' },
-            { partNo: '440-415', jobber: 211.95, retail: 235.7230769, description: 'HIGH TORQUE STARTER; V8, 4.41:1 GEAR REDUCTION RATIO*' },
-            { partNo: '141-712', jobber: 214.95, retail: 246.4461538, description: 'CHEVROLET AND BOWTIE EMBLEM S/B, CARBON-STYLE, TALL V/C. RED BOWTIE AND RED LETTERS.*' },
-            { partNo: '141-651', jobber: 219.95, retail: 240.5846154, description: 'CHEVY BOWTIE EMBLEM S/B ALUMINUM ELECTRIC WATER PUMP, ALUMINUM FITTING INCLUDED, BLACK.*' },
-            { partNo: '141-652', jobber: 219.95, retail: 240.5846154, description: 'CHEVY BOWTIE EMBLEM S/B ALUMINUM ELECTRIC WATER PUMP, ALUMINUM FITTING INCLUDED, RED.*' },
-            { partNo: '141-653', jobber: 219.95, retail: 240.5846154, description: 'CHEVY BOWTIE EMBLEM S/B ALUMINUM ELECTRIC WATER PUMP, ALUMINUM FITTING INCLUDED, BLUE.*' },
-            { partNo: '440-835', jobber: 222.95, retail: 234.5384615, description: 'MOPAR SLANT-EDGE AIR CLEANER KIT; CHROME; RECESSED BLACK EMBLEM*' },
-            { partNo: '67108C', jobber: 222.95, retail: 259.3384615, description: 'CARBURETOR MAIN BODY, FOR USE ON HOLLEY 950 CFM*' },
-            { partNo: '67216', jobber: 222.95, retail: 259.3384615, description: 'CARBURETOR MAIN BODY, ALCOHOL, FOR USE ON HOLLEY 750 CFM*' },
-            { partNo: '67217', jobber: 222.95, retail: 259.3384615, description: 'CARBURETOR MAIN BODY, ANNULAR BOOSTER, FOR USE ON HOLLEY 750 CFM*' },
-            { partNo: '141-694', jobber: 227.95, retail: 249.2153846, description: 'CHEVY BOWTIE EMBLEM; REAR END COVER; 7.5 GM, 10 BOLT; CAST GRAY*' },
-            { partNo: '141-698', jobber: 227.95, retail: 249.2153846, description: 'CHEVY BOWTIE EMBLEM REAR END COVER, 8.2/8.5 GM, 10 BOLT; CAST GRAY*' },
-            { partNo: '141-699', jobber: 227.95, retail: 249.2153846, description: 'CHEVY BOWTIE EMBLEM REAR END COVER; GM; 12 BOLT; PASSENGER CAR; CAST GRAY*' },
-            { partNo: '141-933', jobber: 269.99, retail: 353.4615385, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST VALVE COVERS, SLANT-EDGE, RAISED EMBLEM, CHEVY S/B V8, 1958-1986, GREEN*' },
-            { partNo: '440-472', jobber: 233.95, retail: 254.4615385, description: 'MOPAR ALTERNATOR; 110 AMP; CHROME FINISH*' },
-            { partNo: '440-473', jobber: 233.95, retail: 254.4615385, description: 'MOPAR ALTERNATOR; 110 AMP; BLACK FINISH*' },
-            { partNo: '67109C', jobber: 233.95, retail: 259.3384615, description: 'CARBURETOR MAIN BODY, FOR USE ON HOLLEY 1050 CFM*' },
-            { partNo: '141-130', jobber: 238.95, retail: 260.8153846, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST VALVE COVERS CENTER BOLT. S/B V8, 1987-LS. POLISHED*' },
-            { partNo: '141-131', jobber: 238.95, retail: 260.8153846, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST VALVE COVERS CENTER BOLT. S/B V8, 1987-LS. BLACK CRINKLE*' },
-            { partNo: '141-672', jobber: 239.95, retail: 307.4923077, description: 'CHEVY BOWTIE EMBLEM B/B ALUMINUM ELECTRIC WATER PUMP, ALUMINUM FITTING INCLUDED, RED*' },
-            { partNo: '141-673', jobber: 239.95, retail: 307.4923077, description: 'CHEVY BOWTIE EMBLEM B/B ALUMINUM ELECTRIC WATER PUMP, ALUMINUM FITTING INCLUDED, BLUE*' },
-            { partNo: '141-674', jobber: 239.95, retail: 307.4923077, description: 'CHEVY BOWTIE EMBLEM B/B ALUMINUM ELECTRIC WATER PUMP, ALUMINUM FITTING INCLUDED, BLACK*' },
-            { partNo: '440-450', jobber: 243.95, retail: 285.3384615, description: 'BIG BLOCK CHRYSLER ELECTRIC WATER PUMP*' },
-            { partNo: '66435', jobber: 252.95, retail: 288.4, description: 'LIGHTNING-BOLT ALTERNATOR; 100 AMP*' },
-            { partNo: '141-939', jobber: 254.95, retail: 278.2153846, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST VALVE COVERS, SLANT-EDGE, RAISED EMBLEM, CHEVY S/B V8, 1958-1986, POWDER-COAT READY*' },
-            { partNo: '141-153', jobber: 36.94, retail: 286.7076923, description: '100 AMP ALTERNATOR, RECESSED BLACK BOWTIE EMBLEM, CAST GRAY CRINKLE*' },
-            { partNo: '440-758', jobber: 264.95, retail: 279.2153846, description: 'MOPAR ENGINE DRESS-UP KIT; CHRYSLER SMALL BLOCK (LA) ENGINES; BLACK CRINKLE*' },
-            { partNo: '440-880', jobber: 264.95, retail: 279.2153846, description: 'MOPAR ENGINE DRESS-UP KIT; CHRYSLER SMALL BLOCK (LA) ENGINES; SHARK GRAY*' },
-            { partNo: '440-900', jobber: 264.95, retail: 279.2153846, description: 'MOPAR ENGINE DRESS-UP KIT; CHRYSLER SMALL BLOCK (LA) ENGINES; CHROME*' },
-            { partNo: '67218', jobber: 264.95, retail: 293.9538462, description: 'CARBURETOR MAIN BODY, ANNULAR BOOSTER, FOR USE WITH HOLLEY 1050 CFM*' },
-            { partNo: '141-156', jobber: 264.95, retail: 293.5076923, description: '100 AMP ALTERNATOR, RECESSED BLACK BOWTIE EMBLEM, POLISHED*' },
-            { partNo: '66437', jobber: 267.95, retail: 311.4769231, description: 'LIGHTNING-BOLT ALTERNATOR W/ 10SI ADAPTER KIT*' },
-            { partNo: '141-146', jobber: 269.95, retail: 288.0615385, description: '100 AMP ALTERNATOR, RAISED BOWTIE EMBLEM, BLACK CRINKLE*' },
-            { partNo: '141-147', jobber: 269.95, retail: 288.0615385, description: '100 AMP ALTERNATOR, RAISED BOWTIE EMBLEM, LIQUID BLACK*' },
-            { partNo: '141-148', jobber: 269.95, retail: 288.0615385, description: '100 AMP ALTERNATOR, RAISED BOWTIE EMBLEM, ORANGE*' },
-            { partNo: '141-149', jobber: 269.95, retail: 288.0615385, description: '100 AMP ALTERNATOR, RAISED BOWTIE EMBLEM, CAST GRAY CRINKLE*' },
-            { partNo: '141-150', jobber: 269.95, retail: 288.0615385, description: '100 AMP ALTERNATOR, RAISED BOWTIE EMBLEM, RED*' },
-            { partNo: '141-152', jobber: 269.95, retail: 286.7076923, description: '100 AMP ALTERNATOR, RECESSED RED BOWTIE EMBLEM, BLACK CRINKLE*' },
-            { partNo: '141-151', jobber: 274.95, retail: 297.6461538, description: '100 AMP ALTERNATOR, RAISED BOWTIE EMBLEM, POLISHED*' },
-            { partNo: '141-926', jobber: 275.99, retail: 309.4461538, description: 'CHEVY DIE-CAST VALVE COVERS, SLANT-EDGE, S/B V8, 1958-1986, NO EMBLEM, POLISHED*' },
-            { partNo: '440-434', jobber: 296.95, retail: 341.7692308, description: 'CHRYSLER HEI DISTRIBUTOR W/ BLACK CAP FOR 273 THRU 360 ENGINES*' },
-            { partNo: '141-932', jobber: 299.95, retail: 353.4615385, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST VALVE COVERS, SLANT-EDGE, RAISED EMBLEM, CHEVY S/B V8, 1958-1986, BLUE*' },
-            { partNo: '141-843', jobber: 307.95, retail: 336.1846154, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST SLANT-EDGE VALVE COVERS CENTER BOLT. S/B V8, 87-LS, POLISHED, RECESSED RED/BLACK EMBLEM*' },
-            { partNo: '141-869', jobber: 314.95, retail: 308.2153846, description: 'CHEVY & BOWTIE EMBLEM; DIE-CAST VALVE COVERS, SLANT-EDGE W/ RAISED EMBLEM, CHEVY B/B V8, POWDERCOAT READY*' },
-            { partNo: '141-117', jobber: 317.95, retail: 391.0153846, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST VALVE COVERS. CHROME PLATED. CHEVY S/B V8, 1958-86.*' },
-            { partNo: '141-256', jobber: 317.95, retail: 347.7846154, description: 'LSX DIE-CAST VALVE COVERS, SLANT-EDGE, RAISED EMBLEM, LS V8 ENGINES, BLACK*' },
-            { partNo: '141-257', jobber: 317.95, retail: 347.7846154, description: 'LSX DIE-CAST VALVE COVERS, SLANT-EDGE, RAISED EMBLEM, LS V8 ENGINES, CHEVY ORANGE*' },
-            { partNo: '141-264', jobber: 317.95, retail: 355.4307692, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST VALVE COVERS, SLANT-EDGE, RECESSED RED/BLACK EMBLEM, LS V8 ENGINES, POLISHED.*' },
-            { partNo: '141-266', jobber: 317.95, retail: 347.7846154, description: 'CHEVY DIE-CAST VALVE COVERS, SLANT-EDGE, NO EMBLEM, LS V8 ENGINES, POLISHED.*' },
-            { partNo: '141-758', jobber: 317.95, retail: 347.7846154, description: 'CHEVY BLACK CRINKLE DRESS-UP KIT. RED BOWTIE EMBLEM, RED LETTERING. V/C, A/C, T/C COVER, H/D, B/CAP P/N 141-754*' },
-            { partNo: '141-780', jobber: 317.95, retail: 347.7846154, description: 'CHEVY ORANGE DRESS UP KIT.  BLACK BOWTIE EMBLEM, BLACK LETTERING.  V/C, A/C, T/C COVER, H/D.*' },
-            { partNo: '141-840', jobber: 317.95, retail: 347.7846154, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST SLANT-EDGE VALVE COVERS CENTER BOLT. S/B V8, 87-LS, BLACK CRINKLE, RAISED EMBLEM*' },
-            { partNo: '141-841', jobber: 317.95, retail: 347.7846154, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST SLANT-EDGE VALVE COVERS CENTER BOLT. S/B V8, 87-LS, CHEVY ORANGE, RAISED EMBLEM*' },
-            { partNo: '141-842', jobber: 317.95, retail: 347.7846154, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST SLANT-EDGE VALVE COVERS CENTER BOLT. S/B V8, 87-LS, CAST GRAY CRINKLE, RAISED EMBLEM*' },
-            { partNo: '141-847', jobber: 299.95, retail: 328.0923077, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST SLANT-EDGE VALVE COVERS CENTER BOLT. S/B V8, 87-LS, LIQUID BLACK, RAISED EMBLEM' },
-            { partNo: '67601', jobber: 299.99, retail: 400.5846154, description: 'VALVE SPRING PRESSURE TESTER' },
-            { partNo: '66868', jobber: 302.99, retail: 404.9692308, description: 'EXTRUDED ALUMINUM SHAFT- MOUNTED ROLLER-ROCKER ARMS. CHRYSLER B/B 1.5 RATIO.' },
-            { partNo: '66869', jobber: 308.99, retail: 425.1846154, description: 'EXTRUDED ALUMINUM SHAFT- MOUNTED ROLLER-ROCKER ARMS. CHRYSLER S/B 1.5 RATIO.' },
-            { partNo: '141-919', jobber: 317.95, retail: 347.7846154, description: 'CHEVROLET & BOWTIE EMBLEM DIE-CAST VALVE COVERS, SLANT-EDGE, RAISED EMBLEM, CHEVY S/B V8, 1958-1986, LIQUID BLACK' },
-            { partNo: '69467', jobber: 335.99, retail: 352.8, description: 'LS1 / LS6 ROCKER ARMS 1.7 RATIO' },
-            { partNo: '69468', jobber: 335.99, retail: 369.0769231, description: 'EXTRUDED ALUMINUM SHAFT- MOUNTED ROLLER-ROCKER ARMS. CHRYSLER B/B 1.6 RATIO' },
-            { partNo: '69469', jobber: 335.99, retail: 369.0769231, description: 'EXTRUDED ALUMINUM SHAFT- MOUNTED ROLLER-ROCKER ARMS. CHRYSLER S/B 1.6 RATIO' },
-            { partNo: '67044', jobber: 338.99, retail: 370.8, description: 'CHRYSLER DISTRIBUTOR W/ RED CAP; FITS 413-426 HEMI 426W-440' },
-            { partNo: '67043', jobber: 339.99, retail: 370.8, description: 'CHRYSLER HEI DISTRIBUTOR W/ RED CAP; FITS 361-383-400 ENGINES' },
-            { partNo: '66775', jobber: 349.99, retail: 470.4615385, description: 'HEAVY-DUTY BENCH TOP SPRING TESTER - 700 LB' },
-            { partNo: '66774', jobber: 352.99, retail: 470.4615385, description: 'HEAVY-DUTY BENCH TOP SPRING TESTER - 300 LB' },
-            { partNo: '66849', jobber: 385.99, retail: 527.7846154, description: 'PNEUMATIC VALVE SPRING COMPRESSOR' },
-            { partNo: '66765', jobber: 387.99, retail: 489.2153846, description: 'ELECTRIC PISTON RING FILER, 2 GRINDING WHEELS (66762) AND AC ADAPTER INCLUDED.' },
-            { partNo: '121FS10', jobber: 412.99, retail: 528.6923077, description: '123 SERIES RADIATOR SYSTEM; UNIVERSAL; FORD; 21 CORE; SHROUD & FAN; MANUAL TRANSMISSION' },
-            { partNo: '117FS10', jobber: 484.99, retail: 528.6923077, description: '123 SERIES RADIATOR SYSTEM; UNIVERSAL; FORD; 17 CORE; SHROUD & FAN; MANUAL TRANSMISSION' },
-            { partNo: '117GS10', jobber: 484.99, retail: 528.6923077, description: '123 SERIES RADIATOR SYSTEM; UNIVERSAL; GM; 17 CORE; SHROUD & FAN; MANUAL TRANSMISSION' },
-            { partNo: '119FS10', jobber: 484.99, retail: 528.6923077, description: '123 SERIES RADIATOR SYSTEM; UNIVERSAL; FORD; 19 CORE; SHROUD & FAN; MANUAL TRANSMISSION' },
-            { partNo: '119GS10', jobber: 484.99, retail: 528.6923077, description: '123 SERIES RADIATOR SYSTEM; UNIVERSAL; GM; 19 CORE; SHROUD & FAN; MANUAL TRANSMISSION' },
-            { partNo: '121GS10', jobber: 484.99, retail: 528.6923077, description: '123 SERIES RADIATOR SYSTEM; UNIVERSAL; GM; 21 CORE; SHROUD & FAN; MANUAL TRANSMISSION' },
-            { partNo: '123FS10', jobber: 484.99, retail: 528.6923077, description: '123 SERIES RADIATOR SYSTEM; UNIVERSAL; FORD; 23 CORE, SHROUD & FAN; MANUAL TRANSMISSION' },
-            { partNo: '123GS10', jobber: 484.99, retail: 528.6923077, description: '123 SERIES RADIATOR SYSTEM; UNIVERSAL; GM; 23 CORE; SHROUD & FAN; MANUAL TRANSMISSION' },
-            { partNo: '126FS10', jobber: 484.99, retail: 528.6923077, description: '123 SERIES RADIATOR SYSTEM; UNIVERSAL; FORD; 26 CORE; SHROUD & FAN; MANUAL TRANSMISSION' },
-            { partNo: '126GS10', jobber: 484.99, retail: 528.6923077, description: '123 SERIES RADIATOR SYSTEM; UNIVERSAL; GM; 26 CORE; SHROUD & FAN; MANUAL TRANSMISSION' },
-            { partNo: '126LS10', jobber: 484.99, retail: 528.6923077, description: '123 SERIES RADIATOR; UNIVERSAL; GM; 26 CORE; SHROUD & FAN; LS CONV; MANUAL TRANSMISSION' },
-            { partNo: '126FS20', jobber: 522.99, retail: 570.3076923, description: '123 SERIES RADIATOR; UNIVERSAL; FORD; 26 CORE; SHROUD & DUAL FANS; MANUAL TRANSMISSION' },
-            { partNo: '126GS20', jobber: 522.99, retail: 570.3076923, description: '123 SERIES RADIATOR SYSTEM; UNIVERSAL; GM; 26 CORE; SHROUD & DUAL DUNS; MANUAL TRANSMISSION' },
-            { partNo: '126LS20', jobber: 529.99, retail: 570.3076923, description: '123 SERIES RADIATOR SYSTEM; UNIVERSAL; GM; 26 CORE; SHROUD & DUAL FANS; LS CONV; MANUAL TRANSMISSION' },
-            { partNo: '126FB20', jobber: 536.99, retail: 584.8, description: '123 SERIES RADIATOR SYSTEM; UNIVERSAL; FORD; 26 CORE; BRACKET & DUAL FANS; MANUAL TRANSMISSION' },
-            { partNo: '126GB20', jobber: 536.99, retail: 584.8, description: '123 SERIES RADIATOR SYSTEM; UNIVERSAL; 26 CORE; BRACKET & DUAL FANS; MANUAL TRANSMISSION' },
-            { partNo: '126LB20', jobber: 536.99, retail: 584.8, 'description': '123 SERIES RADIATOR SYSTEM; UNIVERSAL; GM; 26 CORE; BRACKET & DUAL FANS; LS CONV; MANUAL TRANSMISSION' },
-            { partNo: '66864', jobber: 576.99, retail: 669.3384615, description: 'BUICK 455 SHAFT-MOUNTED BILLET ALUMINUM ROLLER ROCKERS' },
-            { partNo: '66776', jobber: 620.99, retail: 766.1692308, description: 'DIGITAL BENCH TOP SPRING TESTER - 1,000 LB' },
-            { partNo: '66772', jobber: 704.99, retail: 969.2153846, description: 'HEAVY-DUTY MULTIPLE ANGLE PISTON VISE' },
-            { partNo: '69590-19', jobber: 749.99, retail: 899.9230769, description: 'SLIM-FIT RADIATOR; UNIVERSAL; FORD; 19 CORE; MANUAL TRANS' },
-            { partNo: '69580-17', jobber: 749.99, retail: 899.9230769, description: 'SLIM-FIT RADIATOR; UNIVERSAL; GM; 17 CORE; MANUAL TRANS' },
-            { partNo: '69580-19', jobber: 749.99, retail: 899.9230769, description: 'SLIM-FIT RADIATOR; UNIVERSAL; GM; 19 CORE; MANUAL TRANS' },
-            { partNo: '69580-21', jobber: 749.99, retail: 899.9230769, description: 'SLIM-FIT RADIATOR; UNIVERSAL; GM; 21 CORE; MANUAL TRANS' },
-            { partNo: '69580-23', jobber: 749.99, retail: 899.9230769, description: 'SLIM-FIT RADIATOR; UNIVERSAL; GM; 23 CORE; MANUAL TRANS' },
-            { partNo: '69580-26', jobber: 749.99, retail: 899.9230769, description: 'SLIM-FIT RADIATOR; UNIVERSAL; GM; 26 CORE; MANUAL TRANS' },
-            { partNo: '69590-17', jobber: 749.99, retail: 899.9230769, description: 'SLIM-FIT RADIATOR; UNIVERSAL; FORD; 17 CORE; MANUAL TRANS' },
-            { partNo: '69590-21', jobber: 749.99, retail: 899.9230769, description: 'SLIM-FIT RADIATOR; UNIVERSAL; FORD; 21 CORE; MANUAL TRANS' },
-            { partNo: '69590-23', jobber: 749.99, retail: 899.9230769, description: 'SLIM-FIT RADIATOR; UNIVERSAL; FORD; 23 CORE; MANUAL TRANS' },
-            { partNo: '69590-26', jobber: 749.99, retail: 899.9230769, description: 'SLIM-FIT RADIATOR; UNIVERSAL; FORD; 19 CORE; MANUAL TRANS' },
-            { partNo: '69680.2', jobber: 796.99, retail: 923, description: 'SLIM-FIT RADIATOR, 1979-93 MUSTANG, COUGAR, AUTOMATIC TRANS' },
-            { partNo: '69600.1', jobber: 799.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1967-69 CAMARO, FIREBIRD; SB/BB; MANUAL TRANS' },
-            { partNo: '69600.2', jobber: 799.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1967-69 CAMARO, FIREBIRD; SB/BB; AUTO TRANS' },
-            { partNo: '69600.4', jobber: 799.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1967-69 CAMARO, FIREBIRD; LS; AUTO TRANS' },
-            { partNo: '69605.2', jobber: 799.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1970-81 CAMARO, FIREBIRD, TRANS AM; SB/BB; AUTO TRANS' },
-            { partNo: '69610.2', jobber: 799.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1982-92 CAMARO, FIREBIRD; SB/BB; AUTO TRANS' },
-            { partNo: '69625.1', jobber: 799.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1968-77 CHEVELLE, EL CAMINO, MONTE CARLO; SB/BB; MANUAL TRANS' },
-            { partNo: '69625.2', jobber: 799.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1968-77 CHEVELLE, EL CAMINO, MONTE CARLO; SB/BB; AUTO TRANS' },
-            { partNo: '69625.4', jobber: 799.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1968-77 CHEVELLE, EL CAMINO, MONTE CARLO; LS; AUTO TRANS' },
-            { partNo: '69640.2', jobber: 799.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1978-81 LEMANS, CENTURY; AUTO TRANS' },
-            { partNo: '69650.2', jobber: 799.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1982-93 S10, SONOMA, V8 CONVERSION; SB; AUTO TRANS' },
-            { partNo: '69680.1', jobber: 799.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1979-93 MUSTANG, COUGAR; MANUAL TRANS' },
-            { partNo: '69695.1', jobber: 799.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1960+ MOPAR A/B BODY A; MANUAL TRANS' },
-            { partNo: '69695.2', jobber: 799.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1960+ MOPAR A/B BODY; AUTO TRANS' },
-            { partNo: '69696.1', jobber: 799.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1960+ MOPAR A/B BODY; MANUAL TRANS; REVERSE PLUMBING' },
-            { partNo: '69696.2', jobber: 799.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1960+ MOPAR A/B BODY; AUTO TRANS; REVERSE PLUMBING' },
-            { partNo: '69681.2', jobber: 857.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1964-66 MUSTANG; PASSENGER OUTLET; AUTOMATIC TRANSMISSION' },
-            { partNo: '69682.2', jobber: 857.99, retail: 923, description: 'SLIM-FIT RADIATOR; 1964-1966 MUSTANG; DRIVER OUTLET; AUTOMATIC TRANSMISSION' },
-            { partNo: '67641', jobber: 1559.99, retail: 1907.692308, description: '14,000 LB HIGH CAPACITY WIRELESS VEHICLE SCALE' },
-            { partNo: '66906C', jobber: 82.31, retail: 126.6307692, description: 'STAMPED ROLLER-TIP ROCKERS. CHEVY S/B, 1.5 RATIO, 3/8 STUD.' },
-            { partNo: '66908C', jobber: 155.97, retail: 239.9538462, description: 'EXTRUDED ALUMINUM ROLLER-ROCKER ARMS. CHEVY S/B, 1.6 RATIO, 3/8 STUD.' },
-            { partNo: '66909C', jobber: 178.02, retail: 273.8769231, description: 'EXTRUDED ALUMINUM ROLLER-ROCKER ARMS. CHEVY S/B, 1.5 RATIO, 7/16 STUD.' },
-            { partNo: '66910C', jobber: 178.02, retail: 273.8769231, description: 'EXTRUDED ALUMINUM ROLLER-ROCKer ARMS. CHEVY S/B, 1.6 RATIO, 7/16 STUD.' },
-            { partNo: '66913C', jobber: 188.14, retail: 289.4461538, description: 'EXTRUDED ALUMINUM ROLLER-ROCKERS. CHEVY B/B, 1.7 RATIO, 7/16 STUD.' },
-            { partNo: '66914C', jobber: 188.14, retail: 289.4461538, description: 'EXTRUDED ALUMINUM ROLLER-ROCKERS. CHEVY S/B, 1.5 RATIO, 3/8 STUD. SELF ALIGNING.' },
-            { partNo: '66915C', jobber: 188.14, retail: 289.4461538, description: 'EXTRUDED ALUMINUM ROLLER-ROCKERS. CHEVY S/B, 1.6 RATIO, 3/8 STUD. SELF ALIGNING.' },
-            { partNo: '66906C', jobber: 82.31, retail: 126.6307692, description: 'STAMPED ROLLER-TIP ROCKERS. CHEVY S/B, 1.5 RATIO, 3/8 STUD.' },
-            { partNo: '66908C', jobber: 155.97, retail: 239.9538462, description: 'EXTRUDED ALUMINUM ROLLER-ROCKER ARMS. CHEVY S/B, 1.6 RATIO, 3/8 STUD.' },
-            { partNo: '66909C', jobber: 178.02, retail: 273.8769231, description: 'EXTRUDED ALUMINUM ROLLER-ROCKER ARMS. CHEVY S/B, 1.5 RATIO, 7/16 STUD.' },
-            { partNo: '66910C', jobber: 178.02, retail: 273.8769231, description: 'EXTRUDED ALUMINUM ROLLER-ROCKER ARMS. CHEVY S/B, 1.6 RATIO, 7/16 STUD.' },
-            { partNo: '66913C', jobber: 188.14, retail: 289.4461538, description: 'EXTRUDED ALUMINUM ROLLER-ROCKERS. CHEVY B/B, 1.7 RATIO, 7/16 STUD.' },
-            { partNo: '66914C', jobber: 188.14, retail: 289.4461538, description: 'EXTRUDED ALUMINUM ROLLER-ROCKERS. CHEVY S/B, 1.5 RATIO, 3/8 STUD. SELF ALIGNING.' },
-            { partNo: '66915C', jobber: 188.14, retail: 289.4461538, description: 'EXTRUDED ALUMINUM ROLLER-ROCKERS. CHEVY S/B, 1.6 RATIO, 3/8 STUD. SELF ALIGNING.' }
+        const partsData = [
+            { partNo: '440-970', retail: '$5.95', jobber: '$5.22', description: 'MOPAR EMBLEM COLLECTIBLE PISTON ROD KEYCHAIN, 1 PC*' },
+            { partNo: '141-615', retail: '$7.95', jobber: '$8.06', description: 'GROMMET SET. ONE PUSH-IN FOR AIR BREATHER & ONE FOR PCV VALVE.*' },
+            { partNo: '141-200', retail: '$8.95', jobber: '$9.22', description: 'CHEVY S/B TIMING TAB WITH 6-3/4" OR 7" BALANCER. CHEVY 1969-90.*' },
+            { partNo: '141-201', retail: '$8.95', jobber: '$9.22', description: 'CHEVY B/B TIMING TAB WITH 8" BALANCER. CHEVY 1965-91.*' },
+            { partNo: '141-202', retail: '$8.95', jobber: '$9.22', description: 'CHEVY S/B TIMING TAB WITH 8" BALANCER. CHEVY 1969-91.*' },
+            { partNo: '141-211', retail: '$12.95', jobber: '$13.86', description: 'CHEVY BOWTIE EMBLEM FUEL PUMP BLOCK-OFF PLATE. CHEVY B/B V8.*' },
+            { partNo: '141-213', retail: '$12.95', jobber: '$13.86', description: 'CHEVY BOWTIE EMBLEM FUEL PUMP BLOCK-OFF PLATE. CHEVY B/B V8. BLACK CRINKLE.*' },
+            { partNo: '141-210', retail: '$12.95', jobber: '$13.86', description: 'CHEVY BOWTIE EMBLEM FUEL PUMP BLOCK-OFF PLATE. CHEVY S/B V8.*' },
+            { partNo: '141-212', retail: '$12.95', jobber: '$13.86', description: 'CHEVY BOWTIE EMBLEM FUEL PUMP BLOCK-OFF PLATE. CHEVY S/B V8. BLACK CRINKLE.*' },
+            { partNo: '141-322', retail: '$13.95', jobber: '$15.02', description: 'SMALL CHEVY BOWTIE AIR CLEANER CENTER NUT.*' },
+            { partNo: '141-328', retail: '$13.95', jobber: '$15.02', description: 'SMALL HI-TECH CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT.*' },
+            { partNo: '141-332', retail: '$13.95', jobber: '$15.02', description: 'SMALL HI-TECH GM LOGO AIR CLEANER CENTER NUT.*' },
+            { partNo: '141-333', retail: '$14.95', jobber: '$16.18', description: 'LARGE CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT.*' },
+            { partNo: '141-629', retail: '$14.95', jobber: '$16.18', description: 'CHEVY BOWTIE EMBLEM PUSH-IN OIL FILLER CAP, BLACK CRINKLE*' },
+            { partNo: '141-630', retail: '$14.95', jobber: '$16.18', description: 'CHEVY BOWTIE EMBLEM PUSH-IN OIL FILLER CAP.*' },
+            { partNo: '141-227', retail: '$14.95', jobber: '$16.18', description: 'GM MASTER CYLINDER COVER. SINGLE CLIP. 5-5/8" x 3", FOR POWER DISK BRAKES OR MANUAL.*' },
+            { partNo: '141-323', retail: '$14.95', jobber: '$16.18', description: 'LARGE HI-TECH CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT.*' },
+            { partNo: '141-327', retail: '$14.95', jobber: '$16.18', description: 'LARGE HI-TECH GM LOGO AIR CLEANER CENTER NUT.*' },
+            { partNo: '141-616', retail: '$15.95', jobber: '$17.34', description: 'CHEVY BOWTIE EMBLEM PUSH-IN AIR BREATHER CAP, 3" DIAMETER.*' },
+            { partNo: '141-617', retail: '$15.95', jobber: '$17.34', description: 'CHEVY BOWTIE EMBLEM PUSH-ON AIR BREATHER CAP, 3" DIAMETER. USE W/ OIL FILLER TUBE.*' },
+            { partNo: '141-618', retail: '$15.95', jobber: '$17.34', description: 'CHEVY BOWTIE EMBLEM TWIST-ON AIR BREATHER CAP, 3" DIAMETER. USE W/ CHEVY STYLE HOLES.*' },
+            { partNo: '141-619', retail: '$15.95', jobber: '$17.34', description: 'CHEVY BOWTIE EMBLEM PUSH-IN AIR BREATHER CAP, RECTANGULAR. USE W/ CHEVY STYLE HOLES.*' },
+            { partNo: '141-338', retail: '$16.95', jobber: '$18.49', description: 'EXTRA-LARGE CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT, CHROME WITH BLACK*' },
+            { partNo: '141-339', retail: '$16.95', jobber: '$18.49', description: 'EXTRA-LARGE CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT, BLACK CRINKLE WITH BLACK.*' },
+            { partNo: '141-369', retail: '$16.95', jobber: '$18.49', description: 'LARGE CHEVY BOWTIE EMBLEM, BLACK CRINKLE, AIR CLEANER CENTER NUT.*' },
+            { partNo: '141-335', retail: '$16.95', jobber: '$18.49', description: 'EXTRA-LARGE CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT, BLACK CRINKLE WITH RED.*' },
+            { partNo: '141-336', retail: '$16.95', jobber: '$18.49', description: 'EXTRA-LARGE CHEVY BOWTIE EMBLEM AIR CLEANER CENTER NUT, CHROME WITH GOLD.*' },
+            { partNo: '141-636', retail: '$16.95', jobber: '$18.49', description: '"CHEVROLET & BOWTIE EMBLEM" WIRE LOOMS. CHEVY S/B V8, 1959-86; CHEVY B/B V8 1965-91.*' },
+            { partNo: '141-550', retail: '$19.95', jobber: '$20.82', description: 'CHEVY OIL DIP STICK KIT. SMALL BLOCK V8 THRU 1977.*' },
+            { partNo: '141-551', retail: '$19.95', jobber: '$20.82', description: 'CHEVY OIL DIP STICK KIT. SMALL BLOCK V8 1978-81.*' },
+            { partNo: '141-133', retail: '$20.95', jobber: '$21.97', description: 'CHEVY V/C HOLD-DOWN BOLTS / 8 PCS*' },
+            { partNo: '141-367', retail: '$21.95', jobber: '$23.12', description: 'MINI NUTS, VALVE COVER, STEEL, GRAY, BLUE BOWTIE EMBLEM*' },
+            { partNo: '141-601', retail: '$21.95', jobber: '$23.12', description: 'MINI NUTS, VALVE COVER, STEEL, ORANGE, BLACK BOWTIE EMBLEM*' },
+            { partNo: '141-759', retail: '$21.95', jobber: '$23.12', description: 'MINI NUTS, VALVE COVER, STEEL, BLACK, RED BOWTIE EMBLEM*' }
         ];
 
-        function lookupPrice() {
-            const partNumber = document.getElementById('partNumber').value.trim();
-            const priceType = document.getElementById('priceType').value;
-            const resultDiv = document.getElementById('result');
+        const partNoInput = document.getElementById('partNo');
+        const priceTypeSelect = document.getElementById('priceType');
+        const resultDiv = document.getElementById('result');
 
-            if (!partNumber) {
-                resultDiv.innerHTML = '<span class="error">Please enter a part number.</span>';
-                return;
-            }
-
-            const item = priceData.find(item => item.partNo === partNumber);
-            if (item) {
-                const price = priceType === 'jobber' ? item.jobber : item.retail;
-                resultDiv.innerHTML = `The ${priceType} price for part ${partNumber} is $${price.toFixed(2)}.<br><span class="description">${item.description}</span>`;
+        function lookupPart() {
+            const partNo = partNoInput.value.trim().toUpperCase();
+            const priceType = priceTypeSelect.value;
+            const part = partsData.find(p => p.partNo.toUpperCase() === partNo);
+            if (part) {
+                const price = priceType === 'retail' ? part.retail : part.jobber;
+                resultDiv.innerHTML = `<strong>Price:</strong> ${price}<br><strong>Description:</strong> ${part.description}`;
             } else {
-                resultDiv.innerHTML = `<span class="error">Part number ${partNumber} not found.</span>`;
+                resultDiv.innerHTML = 'Part not found.';
             }
         }
 
-        // Register service worker for offline support
+        partNoInput.addEventListener('input', lookupPart);
+        priceTypeSelect.addEventListener('change', lookupPart);
+    </script>
+
+    <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')
-                    .then(registration => {
-                        console.log('Service Worker registered with scope:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.error('Service Worker registration failed:', error);
-                    });
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed: ', err));
             });
         }
     </script>
