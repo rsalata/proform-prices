@@ -1036,7 +1036,7 @@
 { partNo: '66913C, retail: '188.14, jobber: '289.45, description: 'EXTRUDED ALUMINUM ROLLER-ROCKERS. CHEVY B/B, 1.7 RATIO, 7/16" STUD.*'},
 { partNo: '66914C, retail: '188.14, jobber: '289.45, description: 'EXTRUDED ALUMINUM ROLLER-ROCKERS. CHEVY S/B, 1.5 RATIO, 3/8" STUD. SELF ALIGNING.*'},
 { partNo: '66915C, retail: '188.14, jobber: '289.45, description: 'EXTRUDED ALUMINUM ROLLER-ROCKERS. CHEVY S/B, 1.6 RATIO, 3/8" STUD. SELF ALIGNING.*'}
-        ];
+         ];
 
         const priceTypeSelect = document.getElementById('priceType');
 
@@ -1045,13 +1045,19 @@
             const resultSpan = document.getElementById(`result${index}`);
             const partNo = partNoInput.value.trim().toUpperCase();
             const priceType = priceTypeSelect.value;
+
+            if (!partNo) {
+                resultSpan.innerHTML = '';
+                return;
+            }
+
             const part = partsData.find(p => p.partNo.toUpperCase() === partNo);
 
             if (part) {
                 const price = priceType === 'retail' ? part.retail : part.jobber;
                 resultSpan.innerHTML = `${priceType.charAt(0).toUpperCase() + priceType.slice(1)} price for Part No ${part.partNo} is ${price} ${part.description}`;
             } else {
-                resultSpan.innerHTML = partNo ? 'Part not found.' : '';
+                resultSpan.innerHTML = 'Part not found.';
             }
         }
 
@@ -1061,12 +1067,17 @@
             }
         }
 
-        priceTypeSelect.addEventListener('change', updateAllResults);
-
+        // Add event listeners for input fields
         for (let i = 1; i <= 5; i++) {
-            document.getElementById(`partNo${i}`).addEventListener('input', () => lookupPart(i));
+            const input = document.getElementById(`partNo${i}`);
+            input.addEventListener('input', () => lookupPart(i));
+            input.addEventListener('change', () => lookupPart(i)); // Ensure results update on input change
         }
 
+        // Update all results when price type changes
+        priceTypeSelect.addEventListener('change', updateAllResults);
+
+        // Service Worker registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')
